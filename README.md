@@ -155,22 +155,23 @@ The goal is:
 
 ---
 # Tech Stack
-Planned Stack
-Frontend:
-- React
-- TypeScript
-- CSS
 
-Desktop Framework:
-- Tauri
+**Current:** React, TypeScript, Vite, CSS; desktop shell via **Tauri 2**; **npm** for JavaScript dependencies.
 
-Storage:
-- Local JSON
-- SQLite 
+**Planned:** local JSON and SQLite storage; Spotify Web API and weather API integrations.
 
-APIs:
-- Spotify Web API 
-- Weather API 
+### Local development
+
+Install [Rust](https://www.rust-lang.org/tools/install) and the [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+
+```bash
+npm install
+npm run tauri dev      # Vite dev server + native window
+npm run build          # production web assets (to ../dist)
+npm run tauri build    # packaged desktop app
+```
+
+Recommended VS Code extensions: [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) and [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
 
 ---
 # Project Scope
