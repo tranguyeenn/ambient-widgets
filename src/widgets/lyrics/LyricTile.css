@@ -5,7 +5,6 @@
  */
 
 .lyric-tile {
-  /* One width for both border rings (change here only). */
   --tile-frame: 1px;
 
   position: relative;
@@ -18,25 +17,33 @@
   padding: 0;
 
   border-radius: 0;
-  /* Outer rectangle; gutter between frames uses a dim fill so the gap isn’t fully transparent. */
   background: rgba(10, 10, 10, 0.65);
-  /* Outer rectangle: stroke only; fill comes from inner + gap. */
   border: var(--tile-frame) solid rgba(255, 255, 255, 0.22);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
 
   color: #f4f4f5;
   cursor: grab;
   user-select: none;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.lyric-tile:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 0 22px rgba(180, 150, 255, 0.16),
+    0 18px 42px rgba(0, 0, 0, 0.42);
 }
 
 .lyric-tile:active {
   cursor: grabbing;
+  transform: translateY(0);
 }
 
-/*
- * Inset between outer and inner borders: same thickness as each border so the gap visually
- * matches the frame weight (nested rectangles with even rhythm).
- */
 .lyric-tile__inner {
   flex: 1;
   min-width: 0;
@@ -60,6 +67,8 @@
     rgba(120, 200, 255, 0.85) 0%,
     rgba(180, 140, 255, 0.55) 100%
   );
+
+  animation: ambientAccent 8s ease-in-out infinite alternate;
 }
 
 .lyric-tile__main {
@@ -106,4 +115,16 @@
 
 .lyric-meta__sep {
   opacity: 0.55;
+}
+
+@keyframes ambientAccent {
+  0% {
+    opacity: 0.45;
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    opacity: 0.9;
+    filter: hue-rotate(35deg);
+  }
 }

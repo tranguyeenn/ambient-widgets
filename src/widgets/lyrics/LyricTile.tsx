@@ -1,22 +1,65 @@
-/**
- * LyricTile — a sample “ambient widget” card shown inside the transparent Tauri window.
- *
- * Dragging: with `decorations: false`, there is no OS title bar. We move the *window* by calling
- * `startDragging()` when the user presses the mouse on the tile. The attribute
- * `data-tauri-drag-region` tells the WebView to treat this region as a drag surface as well
- * (see Tauri docs on custom titlebars). The capability `core:window:allow-start-dragging` must
- * be listed in `src-tauri/capabilities/default.json` or the IPC call is denied at runtime.
- *
- * Double rectangular frame (outer + inner) shares one stroke width in CSS via `--tile-frame`.
- * `void` before `startDragging()`: fire-and-forget; we don’t await in the mouse handler.
- */
+import { useEffect, useState } from "react";
 import "./LyricTile.css";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+type LyricData = {
+  success: boolean;
+  error: string | null;
+  line: string | null;
+  song: string;
+  artist: string;
+};
+
 function LyricTile() {
+  const [lyric, setLyric] = useState<LyricData | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const onDragMouseDown = () => {
     void getCurrentWindow().startDragging();
   };
+
+  async function fetchLyric() {
+    try {
+      const song = encodeURIComponent("Nights");
+      const artist = encodeURIComponent("Frank Ocean");
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/lyric?song=${song}&artist=${artist}`
+      );
+
+      const data: LyricData = await response.json();
+      setLyric(data);
+    } catch {
+      setLyric({
+        success: false,
+        error: "Could not connect to lyric backend",
+        line: null,
+        song: "Unknown Song",
+        artist: "Unknown Artist",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchLyric();
+
+    const interval = setInterval(() => {
+      fetchLyric();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const displayLine = loading
+    ? "Loading lyric..."
+    : lyric?.success && lyric.line
+    ? `“${lyric.line}”`
+    : "No lyric found.";
+
+  const displaySong = lyric?.song ?? "Song Title";
+  const displayArtist = lyric?.artist ?? "Artist Name";
 
   return (
     <div
@@ -25,16 +68,18 @@ function LyricTile() {
       onMouseDown={onDragMouseDown}
     >
       <div className="lyric-tile__inner">
-        {/* Decorative strip; aria-hidden so screen readers skip it */}
         <div className="lyric-tile__accent" aria-hidden />
+
         <div className="lyric-tile__main">
           <div className="lyric-icon">♪</div>
+
           <div className="lyric-tile__copy">
-            <p className="lyric-text">“one lyric line here”</p>
+            <p className="lyric-text">{displayLine}</p>
+
             <div className="lyric-meta">
-              <span>Song Title</span>
+              <span>{displaySong}</span>
               <span className="lyric-meta__sep">—</span>
-              <span>Artist Name</span>
+              <span>{displayArtist}</span>
             </div>
           </div>
         </div>
