@@ -2,6 +2,7 @@
  * Lyric tile: rectangular double frame — outer and inner borders use the same stroke width
  * (--tile-frame). Sharp corners (no radius) on both rectangles so the “Tauri” card reads as a
  * true rectangle. Content + blur live inside `.lyric-tile__inner`.
+ * Backgrounds stay low-alpha so the Tauri transparent window shows the desktop through the card.
  */
 
 .lyric-tile {
@@ -17,9 +18,9 @@
   padding: 0;
 
   border-radius: 0;
-  background: rgba(10, 10, 10, 0.65);
-  border: var(--tile-frame) solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+  background: rgba(10, 10, 10, 0.32);
+  border: var(--tile-frame) solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
 
   color: #f4f4f5;
   cursor: grab;
@@ -33,10 +34,10 @@
 
 .lyric-tile:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.28);
   box-shadow:
-    0 0 22px rgba(180, 150, 255, 0.16),
-    0 18px 42px rgba(0, 0, 0, 0.42);
+    0 0 22px rgba(180, 150, 255, 0.14),
+    0 18px 40px rgba(0, 0, 0, 0.32);
 }
 
 .lyric-tile:active {
@@ -53,22 +54,10 @@
   align-items: stretch;
   overflow: hidden;
   border-radius: 0;
-  border: var(--tile-frame) solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 18, 18, 0.48);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.lyric-tile__accent {
-  width: 4px;
-  flex-shrink: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(120, 200, 255, 0.85) 0%,
-    rgba(180, 140, 255, 0.55) 100%
-  );
-
-  animation: ambientAccent 8s ease-in-out infinite alternate;
+  border: var(--tile-frame) solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 18, 0.26);
+  backdrop-filter: blur(26px) saturate(1.15);
+  -webkit-backdrop-filter: blur(26px) saturate(1.15);
 }
 
 .lyric-tile__main {
@@ -77,7 +66,7 @@
   flex-direction: row;
   align-items: center;
   gap: 14px;
-  padding: 14px 16px 14px 12px;
+  padding: 14px 16px;
   min-width: 0;
 }
 
@@ -115,16 +104,4 @@
 
 .lyric-meta__sep {
   opacity: 0.55;
-}
-
-@keyframes ambientAccent {
-  0% {
-    opacity: 0.45;
-    filter: hue-rotate(0deg);
-  }
-
-  100% {
-    opacity: 0.9;
-    filter: hue-rotate(35deg);
-  }
 }

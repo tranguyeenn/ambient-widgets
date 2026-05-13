@@ -2,277 +2,175 @@
 
 Ambient Widgets is a lightweight desktop widget system built for macOS.
 
-The project focuses on creating transparent, minimal, and personal desktop widgets that feel naturally integrated into the desktop environment rather than separate applications.
+The project focuses on transparent, minimal widgets that sit on the desktop instead of feeling like separate apps.
 
-Instead of relying on bulky third-party widgets, Ambient Widgets aims to provide customizable widgets centered around music, productivity, and daily desktop ambience.
+**Today:** a single **LyricTile** in a **Tauri 2** window (frameless, transparent, always on top, draggable) plus an optional **Python** backend that pulls lyrics from the **Genius** API. Other widgets described below are **planned**, not in the repo yet.
 
 ---
 
 # Vision
 
-Modern desktop widgets often feel disconnected from the actual desktop experience:
+Many desktop widgets feel disconnected from the desktop: too large, visually noisy, or opaque blocks on top of the wallpaper.
 
-- too large
-- visually inconsistent
-- overloaded with features
-- lacking transparency/customization
-- designed more like mini apps than ambient tools
-
-Ambient Widgets is designed differently.
-
-The goal is to create small desktop components that quietly exist within the workspace while still being visually meaningful and useful.
-
-The system focuses on:
-
-- transparency
-- minimalism
-- ambient computing
-- personalization
-- lightweight desktop interaction
+Ambient Widgets aims for small components that stay calm and personal—translucent surfaces, soft blur, and light interaction rather than mini dashboards.
 
 ---
 
-# Core Widgets
+# What’s implemented
 
 ## LyricTile
 
-A music-centered widget that displays a lyric line from a recently played song.
+A compact card that shows one lyric line and **Song — Artist** metadata.
 
-Features:
-- lyric line display
-- song title + artist
-- optional album art
-- local lyric storage
-- future Spotify integration
+**Shipped behavior**
 
-Purpose:
-Turn listening history into a small visual memory on the desktop.
+- Frosted, semi-transparent panel (backdrop blur) over the real desktop; native window transparency is enabled in Tauri.
+- Drag the window by clicking the tile (`startDragging` + drag region).
+- Polls the backend every **15 seconds** at `GET http://127.0.0.1:8000/lyric?song=…&artist=…` (JSON: `success`, `error`, `line`, `song`, `artist`).
+- The UI currently requests a **fixed** track for demos (**“Nights”** / **Frank Ocean**); wiring it to “now playing” or user input is future work.
 
-Example:
+**Backend (`backend/`)**
+
+- **FastAPI** app in `api.py`: `GET /` (health), `GET /lyric` (lyric payload).
+- **lyricsgenius** + `GENIUS_ACCESS_TOKEN` (loaded from `backend/.env` via **python-dotenv**). Lyrics are cleaned and filtered (`filters.py`) before a single line is chosen for the widget.
+
+**Not in this version**
+
+- Album art, local lyric files, Spotify “recently played” integration (all roadmap).
+
+Example layout:
 
 ```txt
-♪ "one lyric line here"
+♪ “one lyric line here”
 
 Song Title — Artist
 ```
+
 ---
+
+# Planned widgets
+
 ## ReminderTile
 
-A lightweight reminder and task widget.
+Lightweight reminders and daily load—design only for now.
 
-Unlike traditional todo applications, ReminderTile focuses on realistic workload management instead of infinite task accumulation.
-
-Planned features:
-
-daily tasks
-- lightweight reminders
-- estimated workload tracking
-- completion history
-- rule-based workload recommendations
-- overload detection
-
-Future behavior:
-The widget will gradually learn realistic daily task limits based on completion patterns.
-
-Example:
-```txt
-Today's Recommended Load: Moderate
-
-• Finish DSA assignment
-• Read chapter notes
-• Review linear algebra
-```
-
----
 ## WeatherTile
 
-A transparent weather widget built to better visually integrate with the desktop.
-
-Purpose:
-Provide weather information without the bulky appearance of traditional widgets.
-
-Planned features:
-- current temperature
-- hourly forecast
-- weekly preview
-- transparent glass-style UI
-- desktop-matching color themes
+Transparent weather readout—design only for now.
 
 ---
+
 # Why I’m Building This
 
-Music, desktop aesthetics, and ambient environments are a major part of how I study, focus, and organize daily life.
-
-Most widget systems feel either:
-- overly corporate
-- visually outdated
-- overloaded with features
-- disconnected from the actual desktop aesthetic
-
-Ambient Widgets is intended to feel:
-- softer
-- more personal
-- visually integrated
-- minimal but expressive
-
-This project combines:
-- desktop customization
-- ambient UI design
-- lightweight utility tools
-- music-centered interaction
-
---- 
-# Design Philosophy
-
-Ambient Widgets prioritizes:
-
-## Minimal UI
-Widgets should remain lightweight and unobtrusive.
-The desktop should feel calm rather than crowded.
-
-## Transparency
-Widgets should visually blend into the desktop instead of covering it.
-
-The interface aims to use:
-- glassmorphism
-- translucent surfaces
-- soft shadows
-- subtle blur
-- low visual noise
-
-## Personal Computing
-The widgets are designed around personal routines rather than productivity-maxing behavior.
-
-The goal is not:
-- optimization obsession
-- gamified productivity
-- endless metrics
-
-The goal is:
-- intentional daily interaction
-- emotional personalization
-- lightweight usefulness
+Music, desktop aesthetics, and ambient environments matter for how I focus and organize the day. This project combines desktop customization, soft UI, and small music-adjacent utilities without building another full dashboard.
 
 ---
-# Tech Stack
 
-**Current:** React, TypeScript, Vite, CSS; desktop shell via **Tauri 2**; **npm** for JavaScript dependencies.
+# Design philosophy
 
-**Planned:** local JSON and SQLite storage; Spotify Web API and weather API integrations.
+- **Minimal UI** — calm desktop, not crowded chrome.
+- **Transparency** — glass-style panels, blur, low noise; content sets its own surface where needed.
+- **Personal computing** — routines and taste over gamified productivity.
 
-### Local development
+---
 
-Install [Rust](https://www.rust-lang.org/tools/install) and the [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+# Tech stack
+
+| Layer | Stack |
+| --- | --- |
+| Desktop shell | **Tauri 2** (Rust), transparent undecorated window |
+| UI | **React 19**, **TypeScript**, **Vite 7**, CSS |
+| Backend | **Python**, **FastAPI**, **Uvicorn**, **lyricsgenius**, **python-dotenv** |
+| Package managers | **npm** (frontend), **pip** (backend) |
+
+---
+
+# Local development
+
+### Prerequisites
+
+- [Rust](https://www.rust-lang.org/tools/install) and [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+- **Python 3** for the lyric API.
+
+### Frontend (Tauri + Vite)
 
 ```bash
 npm install
-npm run tauri dev      # Vite dev server + native window
-npm run build          # production web assets (to ../dist)
-npm run tauri build    # packaged desktop app
+npm run dev           # web only (browser)
+npm run tauri dev     # native window + Vite dev server (port 1420)
+npm run build         # typecheck + production bundle → dist/
+npm run tauri build   # packaged app
 ```
+
+### Backend (lyrics API)
+
+From the **repository root** (so `backend` imports resolve):
+
+1. Create `backend/.env` with a Genius client access token:
+
+   ```bash
+   GENIUS_ACCESS_TOKEN=your_token_here
+   ```
+
+2. Install dependencies and run the server:
+
+   ```bash
+   pip install -r backend/requirements.txt
+   uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
+   ```
+
+3. Start `npm run tauri dev` in another terminal. Without the backend, the tile shows a connection error state.
 
 Recommended VS Code extensions: [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) and [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
 
 ---
-# Project Scope
-Ambient Widgets begins as a local desktop application.
 
-The first versions will prioritize:
-- visual polish
-- desktop integration
-- local data
-- widget architecture
+# Roadmap (high level)
+
+- **Done (initial slice):** transparent macOS window, LyricTile UI, Genius-backed `/lyric` API, basic filtering for “widget-sized” lines.
+- **Next:** configurable song/source, persistence, more widgets, external APIs (e.g. Spotify, weather) as needed.
 
 ---
-# MVP Goals
 
-## Phase 1 — Widget Foundation
-- draggable desktop widget system
-- transparent windows
-- shared styling system
-- basic layout engine
+# Folder structure
 
-## Phase 2 — Static Widgets
-Build initial widget versions using hardcoded/local data.
-
-Widgets:
-- LyricTile
-- ReminderTile
-- WeatherTile
-
-## Phase 3 — Dynamic Data
-Add:
-- local persistence
-- JSON-based updates
-- task tracking
-- configurable widget behavior
-
-## Phase 4 — API Integration
-Add:
-- Spotify recently played integration
-- live weather data
-- smarter reminder behavior
-
-## Phase 5 — Personalization
-Add:
-- themes
-- animations
-- album-color accents
-- saved lyric history
-- desktop positioning presets
-
----
-# Folder Structure
-``` bash
+```text
 ambient-widgets/
-│
 ├── src/
 │   ├── widgets/
-│   │   ├── lyric/
-│   │   ├── reminder/
-│   │   └── weather/
-│   │
-│   ├── shared/
-│   │   ├── components/
-│   │   ├── themes/
-│   │   ├── storage/
-│   │   └── utils/
-│   │
-│   └── App.tsx
-│
+│   │   └── lyrics/          # LyricTile.tsx, LyricTile.css
+│   ├── App.tsx
+│   ├── App.css
+│   └── main.tsx
+├── backend/
+│   ├── api.py               # FastAPI routes
+│   ├── lyrics_service.py    # Genius fetch + line selection
+│   ├── filters.py
+│   └── requirements.txt
 ├── src-tauri/
 ├── public/
-├── README.md
-└── package.json
+├── package.json
+└── README.md
 ```
 
 ---
-# Long-Term Goals
-Possible future additions:
-- music-reactive animations
-- focus mode widgets
-- calendar integration
-- desktop ambient modes
-- adaptive color systems
-- multiple desktop layouts
-- widget syncing
-- lightweight AI-assisted workload estimation
+
+# Long-term ideas
+
+Music-reactive visuals, focus/calendar-adjacent widgets, adaptive theming, multiple layouts—only if they stay small and ambient.
 
 ---
-# What This Project Is Not
 
-Ambient Widgets is not:
-- a full operating system
-- a productivity dashboard
-- a Spotify clone
-- a giant workspace manager
-- a bloated widget marketplace
+# What this project is not
 
-The project is intentionally focused on small ambient desktop interactions.
+Not an OS, not a Spotify clone, not a bloated widget store—intentionally small surface area.
 
 ---
+
 # Author
+
 Trang Nguyen
 
 # License
+
 MIT License

@@ -68,8 +68,6 @@ function LyricTile() {
       onMouseDown={onDragMouseDown}
     >
       <div className="lyric-tile__inner">
-        <div className="lyric-tile__accent" aria-hidden />
-
         <div className="lyric-tile__main">
           <div className="lyric-icon">♪</div>
 
