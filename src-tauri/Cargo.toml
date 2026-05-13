@@ -1,3 +1,7 @@
+# Cargo manifest: declares the Rust crate name, version, and dependencies for the native shell.
+# The frontend (React) is separate — see root `package.json`. `cargo build` / `tauri build` use this file.
+# Edition "2021" picks the Rust language version for the whole crate.
+
 [package]
 name = "ambient-widgets"
 version = "0.1.0"
@@ -14,11 +18,13 @@ edition = "2021"
 name = "ambient_widgets_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+# Runs `build.rs` before compiling your code (generates Tauri glue from tauri.conf.json).
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+# `macos-private-api` enables APIs like transparent windows on macOS (see tauri.conf.json).
+tauri = { version = "2", features = ["macos-private-api"] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

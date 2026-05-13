@@ -1,4 +1,6 @@
 {
+  // TypeScript settings for your React source under `src/`.
+  // `references` links to tsconfig.node.json so tooling type-checks Vite config separately.
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -6,7 +8,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* Bundler mode */
+    /* Bundler mode — matches Vite: no emit, ESM resolution, .ts imports allowed */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -14,7 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* Stricter checks; catches unused vars and switch mistakes early */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

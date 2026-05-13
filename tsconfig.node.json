@@ -1,4 +1,6 @@
 {
+  // Used only for Node-side files like `vite.config.ts` (not the browser bundle).
+  // `composite` enables project references from the main tsconfig.json.
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,

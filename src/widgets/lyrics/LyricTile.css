@@ -1,0 +1,109 @@
+/*
+ * Lyric tile: rectangular double frame — outer and inner borders use the same stroke width
+ * (--tile-frame). Sharp corners (no radius) on both rectangles so the “Tauri” card reads as a
+ * true rectangle. Content + blur live inside `.lyric-tile__inner`.
+ */
+
+.lyric-tile {
+  /* One width for both border rings (change here only). */
+  --tile-frame: 1px;
+
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  max-width: 380px;
+  min-height: 104px;
+  padding: 0;
+
+  border-radius: 0;
+  /* Outer rectangle; gutter between frames uses a dim fill so the gap isn’t fully transparent. */
+  background: rgba(10, 10, 10, 0.65);
+  /* Outer rectangle: stroke only; fill comes from inner + gap. */
+  border: var(--tile-frame) solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+
+  color: #f4f4f5;
+  cursor: grab;
+  user-select: none;
+}
+
+.lyric-tile:active {
+  cursor: grabbing;
+}
+
+/*
+ * Inset between outer and inner borders: same thickness as each border so the gap visually
+ * matches the frame weight (nested rectangles with even rhythm).
+ */
+.lyric-tile__inner {
+  flex: 1;
+  min-width: 0;
+  margin: var(--tile-frame);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 0;
+  border: var(--tile-frame) solid rgba(255, 255, 255, 0.14);
+  background: rgba(18, 18, 18, 0.48);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.lyric-tile__accent {
+  width: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(120, 200, 255, 0.85) 0%,
+    rgba(180, 140, 255, 0.55) 100%
+  );
+}
+
+.lyric-tile__main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px 14px 12px;
+  min-width: 0;
+}
+
+.lyric-icon {
+  flex-shrink: 0;
+  font-size: 22px;
+  line-height: 1;
+  opacity: 0.88;
+}
+
+.lyric-tile__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lyric-text {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.lyric-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 8px;
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.lyric-meta__sep {
+  opacity: 0.55;
+}

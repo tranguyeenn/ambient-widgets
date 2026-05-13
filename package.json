@@ -1,5 +1,6 @@
 {
   "name": "ambient-widgets",
+  "description": "Tauri desktop shell + Vite/React/TypeScript UI. npm run dev = web only; npm run tauri dev = native window + dev server; npm run build = typecheck + production bundle to dist/; npm run tauri build = full app.",
   "private": true,
   "version": "0.1.0",
   "type": "module",
