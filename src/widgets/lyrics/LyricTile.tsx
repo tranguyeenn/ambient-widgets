@@ -27,7 +27,19 @@ function LyricTile() {
         `http://127.0.0.1:8000/lyric?song=${song}&artist=${artist}`
       );
 
-      const data: LyricData = await response.json();
+      const data = (await response.json()) as LyricData;
+
+      if (!response.ok) {
+        setLyric({
+          success: false,
+          error: data.error ?? `Lyric API error (${response.status})`,
+          line: null,
+          song: data.song ?? "Unknown Song",
+          artist: data.artist ?? "Unknown Artist",
+        });
+        return;
+      }
+
       setLyric(data);
     } catch {
       setLyric({
@@ -55,8 +67,9 @@ function LyricTile() {
   const displayLine = loading
     ? "Loading lyric..."
     : lyric?.success && lyric.line
-    ? `“${lyric.line}”`
-    : "No lyric found.";
+      ? `“${lyric.line}”`
+      : lyric?.error ??
+        (lyric && !lyric.success ? "No lyric for this track." : "No lyric found.");
 
   const displaySong = lyric?.song ?? "Song Title";
   const displayArtist = lyric?.artist ?? "Artist Name";
