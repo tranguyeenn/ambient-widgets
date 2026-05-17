@@ -1,7 +1,6 @@
 /*
  * Shared document shell for every widget window.
- * Each window is its own WebView: no shared stacking context with other widgets, so z-index
- * stays local and harmless. Keep surfaces transparent so the native Tauri window transparency shows.
+ * Each window is its own WebView. Widget cards fill the window and scale when resized.
  */
 
 html,
@@ -34,16 +33,24 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Edge padding only when the window is larger than the card minimum. */
 #root {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
 }
 
 .widget-mount {
   position: relative;
-  flex-shrink: 0;
-  max-width: 100%;
-  max-height: 100%;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+body.lyrics-page #root,
+body.calendar-page #root {
+  padding: 0;
 }

@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "open:dmg": "open src-tauri/target/release/bundle/dmg/*.dmg",
+    "install:mac": "ditto \"src-tauri/target/release/bundle/macos/Ambient Widgets.app\" \"/Applications/Ambient Widgets.app\""
   },
   "dependencies": {
     "react": "^19.1.0",

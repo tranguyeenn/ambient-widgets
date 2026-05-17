@@ -1,0 +1,151 @@
+/*
+ * Lyric widget — compact default, scales with window size (user-resizable).
+ * Same glass shell / layering as CalendarWidget.
+ */
+
+.lyric-tile {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+
+  color: rgba(245, 245, 247, 0.95);
+  background: rgba(14, 14, 16, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+
+  user-select: none;
+  cursor: default;
+}
+
+.lyric-tile__chrome {
+  padding: clamp(12px, 3.5%, 22px) clamp(14px, 4%, 28px)
+    clamp(10px, 2.5%, 16px);
+  cursor: grab;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lyric-tile__chrome:active {
+  cursor: grabbing;
+}
+
+.lyric-tile__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: clamp(10px, 3%, 20px);
+  min-width: 0;
+}
+
+.lyric-tile__song {
+  margin: 0;
+  font-size: clamp(16px, 4.8vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lyric-tile__mode-label {
+  font-size: clamp(11px, 2.8vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: rgba(245, 245, 247, 0.38);
+}
+
+.lyric-tile__artist {
+  flex-shrink: 0;
+  font-size: clamp(12px, 3.2vw, 20px);
+  font-weight: 500;
+  color: rgba(245, 245, 247, 0.45);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 48%;
+}
+
+.lyric-tile__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 3.5%, 22px);
+  padding: clamp(12px, 3.5%, 22px) clamp(14px, 4%, 28px)
+    clamp(14px, 4%, 24px);
+  min-width: 0;
+  min-height: 0;
+}
+
+.lyric-tile__art-wrap {
+  flex-shrink: 0;
+  width: clamp(44px, 14vw, 100px);
+  height: clamp(44px, 14vw, 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: clamp(8px, 2vw, 12px);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lyric-tile__art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lyric-tile__icon {
+  font-size: clamp(20px, 6vw, 40px);
+  line-height: 1;
+  opacity: 0.88;
+}
+
+.lyric-tile__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(6px, 2%, 12px);
+}
+
+.lyric-tile__line {
+  margin: 0;
+  font-size: clamp(14px, 4.2vw, 26px);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: rgba(245, 245, 247, 0.92);
+}
+
+.lyric-tile__connect {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgba(245, 245, 247, 0.55);
+  font: inherit;
+  font-size: clamp(10px, 2.5vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.lyric-tile__connect:hover {
+  color: rgba(245, 245, 247, 0.85);
+}

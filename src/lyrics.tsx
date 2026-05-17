@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/widget-shell.css";
-import LyricTile from "./widgets/lyrics/LyricTile";
+import LyricTile from "./components/LyricTile";
 
 const el = document.getElementById("root");
 if (!el) {

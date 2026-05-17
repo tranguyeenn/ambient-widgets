@@ -1,12 +1,45 @@
-// Binary entry: smallest possible `main` that hands off to the library crate.
-//
-// Why two files (`main.rs` + `lib.rs`)? Tauri’s mobile targets need a stable `lib` entry point
-// (`run()`), while desktop still uses a `main` binary. The `lib` name in Cargo.toml is
-// `ambient_widgets_lib` so it doesn’t clash with the binary name on Windows.
-
-// Prevents an extra console window when running the release `.exe` on Windows. Keep as-is.
+// Prevents an extra console window when running the release `.exe` on Windows.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod cache;
+mod commands;
+mod genius;
+mod lyric_filter;
+mod spotify;
+mod zenquotes;
+
 fn main() {
-    ambient_widgets_lib::run()
+    let env_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
+    let _ = dotenvy::from_path(&env_path);
+    let _ = dotenvy::dotenv();
+
+    tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![
+            commands::get_current_lyric,
+            commands::fetch_zen_quote,
+            commands::get_now_playing_track,
+            commands::spotify_is_authenticated,
+            commands::spotify_login,
+        ])
+        .setup(|app| {
+            #[cfg(target_os = "macos")]
+            {
+                let menu = tauri::menu::Menu::default(app.handle())?;
+                app.set_menu(menu)?;
+            }
+
+            #[cfg(all(target_os = "macos", not(debug_assertions)))]
+            if let Err(err) = app
+                .handle()
+                .set_activation_policy(tauri::ActivationPolicy::Accessory)
+            {
+                eprintln!("[ambient-widgets] set_activation_policy: {err}");
+            }
+
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

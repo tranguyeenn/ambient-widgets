@@ -1,0 +1,153 @@
+use serde::Serialize;
+use tauri::AppHandle;
+
+use crate::cache::{self, CacheEntry};
+use crate::genius::{self, GeniusError};
+use crate::spotify::{NowPlaying, SpotifyError, login};
+use crate::zenquotes;
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LyricResult {
+    pub line: String,
+    pub song: String,
+    pub artist: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub album_art: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+}
+
+pub fn fallback_lyric() -> LyricResult {
+    LyricResult {
+        line: "Every night fucks every day up".into(),
+        song: "Nights".into(),
+        artist: "Frank Ocean".into(),
+        album_art: None,
+        source: Some("fallback".into()),
+    }
+}
+
+fn cache_entry_to_lyric(entry: CacheEntry) -> LyricResult {
+    LyricResult {
+        line: entry.line,
+        song: entry.song,
+        artist: entry.artist,
+        album_art: entry.album_art,
+        source: Some("cache".into()),
+    }
+}
+
+fn track_lyric(now_playing: &NowPlaying, line: String, source: &str) -> LyricResult {
+    LyricResult {
+        line,
+        song: now_playing.song.clone(),
+        artist: now_playing.artist.clone(),
+        album_art: now_playing.album_art.clone(),
+        source: Some(source.to_string()),
+    }
+}
+
+async fn lyric_from_genius(now_playing: &NowPlaying) -> Result<(LyricResult, Vec<String>), GeniusError> {
+    let candidates =
+        genius::fetch_lyric_candidates(&now_playing.song, &now_playing.artist).await?;
+    let line = candidates
+        .first()
+        .cloned()
+        .ok_or(GeniusError::EmptyLyrics)?;
+    Ok((track_lyric(now_playing, line, "genius"), candidates))
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NowPlayingTrack {
+    pub song: String,
+    pub artist: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub album_art: Option<String>,
+}
+
+fn now_playing_to_track(now_playing: NowPlaying) -> NowPlayingTrack {
+    NowPlayingTrack {
+        song: now_playing.song,
+        artist: now_playing.artist,
+        album_art: now_playing.album_art,
+    }
+}
+
+#[tauri::command]
+pub async fn fetch_zen_quote() -> Result<zenquotes::Quote, String> {
+    zenquotes::fetch_random_quote().await
+}
+
+#[tauri::command]
+pub async fn get_now_playing_track(app: AppHandle) -> Option<NowPlayingTrack> {
+    match crate::spotify::get_now_playing(&app).await {
+        Ok(now_playing) => Some(now_playing_to_track(now_playing)),
+        Err(err) => {
+            if should_log_spotify_error(&err) {
+                eprintln!("[spotify] {err}");
+            }
+            None
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn get_current_lyric(app: AppHandle) -> LyricResult {
+    let now_playing = match crate::spotify::get_now_playing(&app).await {
+        Ok(track) => track,
+        Err(err) => {
+            if should_log_spotify_error(&err) {
+                eprintln!("[spotify] {err}");
+            }
+            return fallback_lyric();
+        }
+    };
+
+    if let Ok(Some(cached)) = cache::get_rotated(&app, &now_playing) {
+        return cache_entry_to_lyric(cached);
+    }
+
+    match lyric_from_genius(&now_playing).await {
+        Ok((result, candidates)) => {
+            if let Err(err) = cache::save(&app, &now_playing, &candidates, "genius") {
+                eprintln!("[cache] {err}");
+            }
+            result
+        }
+        Err(err) => {
+            if should_log_genius_error(&err) {
+                eprintln!("[genius] {err}");
+            }
+            fallback_lyric()
+        }
+    }
+}
+
+fn should_log_spotify_error(err: &SpotifyError) -> bool {
+    !matches!(
+        err,
+        SpotifyError::NotAuthenticated
+            | SpotifyError::NotConfigured
+            | SpotifyError::NothingPlaying
+            | SpotifyError::NoActiveDevice
+    )
+}
+
+fn should_log_genius_error(err: &GeniusError) -> bool {
+    !matches!(
+        err,
+        GeniusError::NotConfigured | GeniusError::NoMatch | GeniusError::EmptyLyrics
+    )
+}
+
+#[tauri::command]
+pub fn spotify_is_authenticated(app: AppHandle) -> bool {
+    crate::spotify::is_authenticated(&app)
+}
+
+#[tauri::command]
+pub async fn spotify_login(app: AppHandle) -> Result<(), String> {
+    login(&app).await.map_err(|err| err.to_string())
+}

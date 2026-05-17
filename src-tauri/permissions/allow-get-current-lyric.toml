@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-get-current-lyric"
+description = "Enables the get_current_lyric command."
+commands.allow = ["get_current_lyric"]

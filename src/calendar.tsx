@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/widget-shell.css";
-import CalendarWidget from "./widgets/calendar/CalendarWidget";
+import CalendarWidget from "./components/CalendarWidget";
 
 const el = document.getElementById("root");
 if (!el) {

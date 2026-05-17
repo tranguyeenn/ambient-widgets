@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-spotify-login"
+description = "Enables the spotify_login command."
+commands.allow = ["spotify_login"]

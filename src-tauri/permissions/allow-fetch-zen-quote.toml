@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-fetch-zen-quote"
+description = "Enables the fetch_zen_quote command."
+commands.allow = ["fetch_zen_quote"]

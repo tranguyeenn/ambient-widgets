@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-get-now-playing-track"
+description = "Enables the get_now_playing_track command."
+commands.allow = ["get_now_playing_track"]

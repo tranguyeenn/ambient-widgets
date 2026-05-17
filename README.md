@@ -1,19 +1,20 @@
 # Ambient Widgets
 
-Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent and the stack stays predictable.
+Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. Spotify, Genius, ZenQuotes, and calendar logic run through the Rust shell—no separate backend server.
 
-**Right now:** a **month calendar** ships first. A **lyric line** widget is wired up but **does not open at launch** until you turn it on in config. No Python is required for the calendar.
+![App icon](src-tauri/app-icon.png)
 
 ---
 
-## Features
+## Widgets
 
 | | Calendar | Lyrics |
 | --- | --- | --- |
-| **Launch** | Opens with the app | Off by default (`"create": false` in `tauri.conf.json`) |
-| **Stacking** | Sits **below** other windows (desktop-style layer), all Spaces | When enabled: floats above (good for a HUD-style tile) |
-| **Backend** | None | Optional **FastAPI** + **Genius** on `http://127.0.0.1:8000` |
-| **Chrome** | Frameless, transparent, drag header | Same + whole-tile drag |
+| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** short quote from [ZenQuotes](https://zenquotes.io) when nothing is playing or Spotify is unavailable |
+| **Launch** | Opens with the app | Opens with the app |
+| **Resize** | Yes — drag window edges; content scales with size | Yes |
+| **Position memory** | Restored on next launch | Restored on next launch |
+| **Chrome** | Frameless glass card, drag via header | Same |
 
 ---
 
@@ -21,75 +22,136 @@ Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React*
 
 ```bash
 npm install
-npm run tauri dev    # Vite on :1420 + native windows
+npm run tauri dev
 ```
 
-**Browser-only UI (no Tauri):**
+Vite serves the UI on **http://localhost:1420**; Tauri opens the native windows.
+
+**Browser-only (no Tauri):**
 
 ```bash
 npm run dev
-# open http://localhost:1420/pages/calendar.html or …/lyrics.html
+# http://localhost:1420/pages/calendar.html
+# http://localhost:1420/pages/lyrics.html
 ```
 
 **Production macOS app:**
 
 ```bash
 npm run tauri build
-# .app lives under src-tauri/target/release/bundle/macos/
 ```
+
+Outputs (not copied to `/Applications` automatically):
+
+- `src-tauri/target/release/bundle/macos/Ambient Widgets.app`
+- `src-tauri/target/release/bundle/dmg/Ambient Widgets_0.1.0_aarch64.dmg`
+
+Install either way:
+
+```bash
+# Drag Ambient Widgets.app from the .dmg to Applications
+npm run open:dmg
+
+# Or copy from the terminal (after build)
+npm run install:mac
+```
+
+Then open **Ambient Widgets** from Applications (or Spotlight). The release build uses an accessory activation policy, so it may not appear in the Dock—use Spotlight or Login Items to launch it.
 
 ---
 
 ## Requirements
 
-- **Node + npm** — frontend tooling  
-- **Rust + Tauri v2 prerequisites** — [install guide](https://v2.tauri.app/start/prerequisites/)  
-- **Python 3** — only if you use the lyric API (`backend/`)
+- **Node + npm** — frontend tooling
+- **Rust + Tauri v2** — [prerequisites](https://v2.tauri.app/start/prerequisites/)
+- **Spotify + Genius** (lyric mode) — API credentials in `src-tauri/.env` (see below)
+- **ZenQuotes** (quote mode) — optional API key in `.env` if you hit rate limits; works without a key when requests succeed
 
 ---
 
-## macOS behavior (calendar-first)
+## Lyrics setup (Spotify + Genius + quote mode)
 
-- **Release `.app`:** `ActivationPolicy::Accessory` in `src-tauri/src/lib.rs` — no **Dock** icon and no **⌘⇥** entry so the bundle feels closer to a desk accessory. **`tauri dev`** keeps the normal policy so the app is easy to switch to while coding.
-- **Quit:** **⌘Q** after the app has focus. Rust installs **`Menu::default`**, which registers the standard **Quit Ambient Widgets** menu item (without that menu, ⌘Q often does nothing).
-- **Calendar layer:** `alwaysOnBottom` + `visibleOnAllWorkspaces` in `tauri.conf.json`, and the same stacking is **re-applied in `setup`** so the window level sticks. Other apps draw **on top** of the widget; this is normal window Z-order, not embedding into the Finder wallpaper.
-- **Login at boot:** **System Settings → General → Login Items & Extensions → Open at Login** — add **Ambient Widgets**.
+1. Copy the example env file:
+
+   ```bash
+   cp src-tauri/.env.example src-tauri/.env
+   ```
+
+2. Fill in credentials:
+
+   ```bash
+   SPOTIFY_CLIENT_ID=your_spotify_client_id
+   SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
+   GENIUS_ACCESS_TOKEN=your_genius_access_token
+   # Optional — higher ZenQuotes limits
+   # ZENQUOTES_API_KEY=your_zenquotes_key
+   ```
+
+   - **Spotify:** [Developer Dashboard](https://developer.spotify.com/dashboard) — add redirect URI `http://127.0.0.1:8888/callback`
+   - **Genius:** [API clients](https://genius.com/api-clients) — create a client access token
+   - **ZenQuotes (optional):** [zenquotes.io/developers](https://zenquotes.io/developers) — free key if quote mode keeps showing the local fallback (rate limits)
+
+3. Run the app. On first launch the lyric window may open Spotify login in your browser; approve access, then play something in Spotify on this Mac.
+
+### Lyric vs quote mode
+
+The tile polls every **15 seconds**:
+
+1. **Spotify first** — `get_now_playing_track` checks for a current track.
+2. **Lyric mode** — if a track is playing, `get_current_lyric` fetches a filtered Genius line (with per-track cache rotation).
+3. **Quote mode** — if Spotify is off, disconnected, errors, or nothing is playing, the UI switches to **quote mode** (subtle label in the header). Quotes are fetched from ZenQuotes via Rust (`fetch_zen_quote`) so the webview is not blocked by CORS. A new quote is requested each refresh window (~15s in-memory cache). If ZenQuotes fails, a local fallback is shown: *“nothing playing, so here’s a thought instead.”* / *quiet mode*.
+
+**Connect Spotify** appears in quote mode when you are not authenticated.
 
 ---
 
-## Lyrics backend (optional)
+## Calendar
 
-From the **repo root** (Python package path is `backend`):
+- Starts on the **current system month**
+- **‹ ›** buttons move month-by-month across all years (Dec → Jan rolls the year)
+- **Today** is always highlighted
+- **Click** a day to select it; selection persists when you change months
+- Leap years and weekday alignment are handled in `src/utils/calendar.ts`
 
-1. `backend/.env`:
+---
 
-   ```bash
-   GENIUS_ACCESS_TOKEN=your_token_here
-   ```
+## macOS behavior
 
-2. Install and run:
-
-   ```bash
-   pip install -r backend/requirements.txt
-   uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
-   ```
-
-3. Turn the lyric window on: in `src-tauri/tauri.conf.json`, set **`"create": true`** on the `lyric` window, rebuild, and keep Uvicorn running. The UI polls **`GET /lyric?song=…&artist=…`** every **15s** (demo query: *Nights* / *Frank Ocean*).
-
-**API:** `backend/api.py` — `GET /`, `GET /lyric`. **`lyrics_service.py`** + **`filters.py`** pick a single “widget-sized” line via **lyricsgenius**.
-
-If nothing listens on **:8000**, the tile shows a **connection** error (not a silent “no lyric”).
+- **Release `.app`:** accessory activation policy — no Dock icon and no **⌘⇥** entry (desk-accessory feel). **`tauri dev`** keeps the normal policy so the app is easy to find while developing.
+- **Quit:** **⌘Q** when the app has focus (standard app menu includes Quit).
+- **All Spaces:** both widgets use `visibleOnAllWorkspaces`.
+- **Login at boot:** **System Settings → General → Login Items → Open at Login** — add **Ambient Widgets**.
 
 ---
 
 ## Architecture
 
-- **Vite multi-page:** each widget has **`pages/<name>.html`** and **`src/<name>.tsx`**. `vite.config.ts` lists them in `build.rollupOptions.input`.
-- **Tauri:** one **`WebviewWindow`** per widget (`lyric`, `calendar`, …). URLs like `pages/calendar.html` resolve in dev and in `dist/` after `npm run build`.
-- **Shared shell:** `src/styles/widget-shell.css` — transparent document + centered mount (no shared React “mega app”).
-- **Rust entry:** `src-tauri/src/lib.rs` — menu, macOS activation policy (release), calendar stacking reinforcement.
+```text
+Frontend (React)                         Tauri (Rust)
+─────────────────                        ────────────
+pages/calendar.html  ──►  calendar.tsx  ──►  CalendarWidget
 
-**Add another widget:** new `pages/*.html` + `src/*.tsx` → Vite `input` → new block in `tauri.conf.json` `app.windows` → same `label` in `src-tauri/capabilities/default.json`.
+pages/lyrics.html    ──►  lyrics.tsx    ──►  LyricTile
+                                              │
+                    ┌─────────────────────────┴─────────────────────────┐
+                    ▼                                                   ▼
+         invoke("get_now_playing_track")              invoke("get_current_lyric")
+                    │                                                   │
+                    ▼                                                   ▼
+              spotify/ (PKCE, now playing)                         commands.rs
+                    │                                     ┌──────────┼──────────┐
+                    │ no track                            ▼          ▼          ▼
+                    ▼                              genius.rs    cache.rs   lyric_filter.rs
+         getFallbackQuote()  ──►  invoke("fetch_zen_quote")  ──►  zenquotes.rs
+         (src/lib/quoteApi.ts)       (ZenQuotes API, no CORS)
+```
+
+- **Vite multi-page:** `pages/*.html` + `src/*.tsx` entries in `vite.config.ts`
+- **One window per widget** in `src-tauri/tauri.conf.json` (`calendar`, `lyric`)
+- **Window state:** `tauri-plugin-window-state` saves size and position per window
+- **Shared shell:** `src/styles/widget-shell.css` — transparent document, widgets fill their window
+
+**Add another widget:** new `pages/*.html` + `src/*.tsx` → Vite `input` → `tauri.conf.json` window block → `capabilities/default.json`
 
 ---
 
@@ -98,34 +160,60 @@ If nothing listens on **:8000**, the tile shows a **connection** error (not a si
 ```text
 ambient-widgets/
 ├── pages/
-│   ├── lyrics.html
-│   └── calendar.html
+│   ├── calendar.html
+│   └── lyrics.html
 ├── src/
-│   ├── lyrics.tsx
 │   ├── calendar.tsx
-│   ├── styles/widget-shell.css
-│   └── widgets/
-│       ├── lyrics/       # LyricTile + CSS
-│       └── calendar/     # CalendarWidget + CSS
-├── backend/
-│   ├── api.py
-│   ├── lyrics_service.py
-│   ├── filters.py
-│   └── requirements.txt
+│   ├── lyrics.tsx
+│   ├── components/
+│   │   ├── CalendarWidget.tsx / .css
+│   │   └── LyricTile.tsx / .css
+│   ├── lib/
+│   │   ├── nowPlaying.ts      # get_now_playing_track wrapper
+│   │   └── quoteApi.ts        # ZenQuotes + quote-mode cache
+│   ├── utils/
+│   │   ├── calendar.ts
+│   │   └── lyricFallback.ts
+│   ├── types/
+│   │   ├── lyric.ts
+│   │   ├── quote.ts
+│   │   └── nowPlaying.ts
+│   └── styles/
+│       └── widget-shell.css
 ├── src-tauri/
-│   ├── src/lib.rs
-│   ├── capabilities/default.json
+│   ├── app-icon.png
+│   ├── .env.example
+│   ├── src/
+│   │   ├── main.rs
+│   │   ├── commands.rs
+│   │   ├── spotify/           # auth, tokens, now playing
+│   │   ├── genius.rs
+│   │   ├── zenquotes.rs
+│   │   ├── lyric_filter.rs
+│   │   └── cache.rs
+│   ├── permissions/
+│   ├── capabilities/
+│   ├── icons/
 │   └── tauri.conf.json
 ├── vite.config.ts
-├── package.json
-└── README.md
+└── package.json
+```
+
+---
+
+## App icon
+
+Replace `src-tauri/app-icon.png` (1024×1024 PNG recommended), then:
+
+```bash
+npx tauri icon src-tauri/app-icon.png -o src-tauri/icons
 ```
 
 ---
 
 ## Roadmap (ideas)
 
-Configurable track / “now playing”, persistence, more windows (weather, tasks, clock, visualizer), autostart plugin, tray controls—only if they stay small and ambient.
+More widgets (weather, tasks, clock), tray menu, autostart plugin—kept small and ambient.
 
 ---
 
