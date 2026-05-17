@@ -60,6 +60,33 @@ Then open **Ambient Widgets** from Applications (or Spotlight). The release buil
 
 ---
 
+## Documentation
+
+In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior live in **[`doc/`](./doc/README.md)**.
+
+| Topic | Guide |
+| --- | --- |
+| Index | [doc/README.md](./doc/README.md) |
+| Architecture | [architecture.md](./doc/architecture.md) |
+| Build outputs (`dist/`, `target/`, …) | [build-outputs.md](./doc/build-outputs.md) |
+| npm scripts | [npm-scripts.md](./doc/npm-scripts.md) |
+| Browser dev (`npm run dev`) | [dev-browser.md](./doc/dev-browser.md) |
+| Native dev (`npm run tauri dev`) | [dev-tauri.md](./doc/dev-tauri.md) |
+| Frontend build | [build-frontend.md](./doc/build-frontend.md) |
+| Release build & install | [build-release.md](./doc/build-release.md) |
+| Rust, Tauri, permissions | [rust-tauri.md](./doc/rust-tauri.md) |
+| App icons | [icons.md](./doc/icons.md) |
+| Startup & macOS policy | [runtime-startup.md](./doc/runtime-startup.md) |
+| Windows & webviews | [runtime-windows.md](./doc/runtime-windows.md) |
+| IPC commands | [runtime-ipc.md](./doc/runtime-ipc.md) |
+| Lyrics widget (poll loop) | [runtime-lyrics-widget.md](./doc/runtime-lyrics-widget.md) |
+| Spotify OAuth | [runtime-spotify.md](./doc/runtime-spotify.md) |
+| Genius & lyric cache | [runtime-genius-cache.md](./doc/runtime-genius-cache.md) |
+| ZenQuotes & quote mode | [runtime-zenquotes.md](./doc/runtime-zenquotes.md) |
+| Calendar widget | [runtime-calendar.md](./doc/runtime-calendar.md) |
+
+---
+
 ## Requirements
 
 - **Node + npm** — frontend tooling
@@ -153,12 +180,15 @@ pages/lyrics.html    ──►  lyrics.tsx    ──►  LyricTile
 
 **Add another widget:** new `pages/*.html` + `src/*.tsx` → Vite `input` → `tauri.conf.json` window block → `capabilities/default.json`
 
+See **[Documentation](#documentation)** for full build and runtime guides.
+
 ---
 
 ## Project layout
 
 ```text
 ambient-widgets/
+├── doc/                       # build & runtime guides (see doc/README.md)
 ├── pages/
 │   ├── calendar.html
 │   └── lyrics.html
