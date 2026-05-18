@@ -8,7 +8,7 @@
 get_now_playing (Spotify)
     │
     ├─ fail ──► fallback_lyric()
-    │              → `hold_my_hand_fallback()` (Genius: Hold My Hand / HAN + bundled cover)
+    │              → `hold_my_hand_fallback()` (English Genius lines, rotates every poll)
     │
     └─ ok ──► cache::get_rotated(app, track)
               │

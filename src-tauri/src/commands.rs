@@ -23,19 +23,44 @@ const HOLD_MY_HAND_SONG: &str = "Hold My Hand";
 const HOLD_MY_HAND_ARTIST: &str = "HAN";
 const HOLD_MY_HAND_LINE_BACKUP: &str =
     "'Cause all I want is you, not your tears";
+const HOLD_MY_HAND_CACHE_ID: &str = "ambient:fallback:hold-my-hand";
 
-async fn hold_my_hand_fallback() -> LyricResult {
-    let line = match genius::fetch_lyric_candidates_english(HOLD_MY_HAND_SONG, HOLD_MY_HAND_ARTIST).await
+fn hold_my_hand_stub() -> NowPlaying {
+    NowPlaying {
+        track_id: Some(HOLD_MY_HAND_CACHE_ID.into()),
+        song: HOLD_MY_HAND_SONG.into(),
+        artist: HOLD_MY_HAND_ARTIST.into(),
+        album_art: Some(HOLD_MY_HAND_COVER.into()),
+    }
+}
+
+async fn hold_my_hand_fallback(app: &AppHandle) -> LyricResult {
+    let stub = hold_my_hand_stub();
+
+    if let Ok(Some(cached)) = cache::get_rotated(app, &stub) {
+        return cache_entry_to_lyric(cached);
+    }
+
+    let candidates = match genius::fetch_lyric_candidates_english(HOLD_MY_HAND_SONG, HOLD_MY_HAND_ARTIST).await
     {
-        Ok(candidates) => candidates
-            .first()
-            .cloned()
-            .unwrap_or_else(|| HOLD_MY_HAND_LINE_BACKUP.to_string()),
+        Ok(c) if !c.is_empty() => c,
+        Ok(_) => vec![HOLD_MY_HAND_LINE_BACKUP.to_string()],
         Err(err) => {
             eprintln!("[fallback] Hold My Hand genius: {err}");
-            HOLD_MY_HAND_LINE_BACKUP.to_string()
+            vec![HOLD_MY_HAND_LINE_BACKUP.to_string()]
         }
     };
+
+    if candidates.len() > 1 {
+        if let Err(err) = cache::save(app, &stub, &candidates, "fallback") {
+            eprintln!("[cache] {err}");
+        }
+    }
+
+    let line = candidates
+        .first()
+        .cloned()
+        .unwrap_or_else(|| HOLD_MY_HAND_LINE_BACKUP.to_string());
 
     LyricResult {
         line,
@@ -119,7 +144,7 @@ pub async fn get_current_lyric(app: AppHandle) -> LyricResult {
             if should_log_spotify_error(&err) {
                 eprintln!("[spotify] {err}");
             }
-            return hold_my_hand_fallback().await;
+            return hold_my_hand_fallback(&app).await;
         }
     };
 
@@ -138,7 +163,7 @@ pub async fn get_current_lyric(app: AppHandle) -> LyricResult {
             if should_log_genius_error(&err) {
                 eprintln!("[genius] {err}");
             }
-            hold_my_hand_fallback().await
+            hold_my_hand_fallback(&app).await
         }
     }
 }
