@@ -32,3 +32,13 @@ pub enum SpotifyError {
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
 }
+
+/// True when Spotify rejected the refresh token (user revoked app access, password reset, etc.).
+pub fn is_revoked_refresh(err: &SpotifyError) -> bool {
+    matches!(
+        err,
+        SpotifyError::AuthFailed(body)
+            if body.contains("invalid_grant")
+                || body.contains("Refresh token revoked")
+    )
+}

@@ -82,7 +82,6 @@ pub fn save(app: &AppHandle, tokens: &TokenStore) -> Result<(), SpotifyError> {
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn clear(app: &AppHandle) -> Result<(), SpotifyError> {
     let path = token_path(app)?;
     if path.exists() {

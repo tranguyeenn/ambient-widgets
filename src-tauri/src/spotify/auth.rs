@@ -12,7 +12,8 @@ use url::Url;
 
 use crate::spotify::config::SpotifyConfig;
 use crate::spotify::error::SpotifyError;
-use crate::spotify::tokens::{TokenResponse, TokenStore, save};
+use crate::spotify::error::is_revoked_refresh;
+use crate::spotify::tokens::{TokenResponse, TokenStore, clear, save};
 
 const PKCE_CHARSET: &[u8] =
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
@@ -250,6 +251,9 @@ pub async fn login(app: &AppHandle) -> Result<(), SpotifyError> {
 }
 
 async fn login_inner(app: &AppHandle) -> Result<(), SpotifyError> {
+    // Drop stale tokens so a fresh OAuth flow always starts clean.
+    let _ = clear(app);
+
     let config = SpotifyConfig::load()?;
     let (verifier, challenge) = generate_pkce_pair();
     let state = random_state();
@@ -272,7 +276,7 @@ async fn login_inner(app: &AppHandle) -> Result<(), SpotifyError> {
 
 pub async fn ensure_access_token(app: &AppHandle) -> Result<String, SpotifyError> {
     let config = SpotifyConfig::load()?;
-    let mut tokens = match crate::spotify::tokens::load(app) {
+    let tokens = match crate::spotify::tokens::load(app) {
         Ok(tokens) => tokens,
         Err(SpotifyError::NotAuthenticated) => return Err(SpotifyError::NotAuthenticated),
         Err(err) => return Err(err),
@@ -287,7 +291,15 @@ pub async fn ensure_access_token(app: &AppHandle) -> Result<String, SpotifyError
         .clone()
         .ok_or(SpotifyError::NotAuthenticated)?;
 
-    tokens = refresh_access_token(&config, &refresh_token).await?;
-    save(app, &tokens)?;
-    Ok(tokens.access_token)
+    match refresh_access_token(&config, &refresh_token).await {
+        Ok(refreshed) => {
+            save(app, &refreshed)?;
+            Ok(refreshed.access_token)
+        }
+        Err(err) if is_revoked_refresh(&err) => {
+            let _ = clear(app);
+            Err(SpotifyError::NotAuthenticated)
+        }
+        Err(err) => Err(err),
+    }
 }

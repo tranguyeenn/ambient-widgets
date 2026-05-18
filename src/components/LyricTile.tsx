@@ -35,6 +35,9 @@ function LyricTile() {
   };
 
   const refresh = async () => {
+    const track = await getNowPlayingTrack();
+
+    // After now-playing, so a revoked refresh token is cleared in Rust first.
     try {
       const authed = await invoke<boolean>("spotify_is_authenticated");
       setAuthenticated(authed);
@@ -42,7 +45,6 @@ function LyricTile() {
       setAuthenticated(false);
     }
 
-    const track = await getNowPlayingTrack();
     if (track) {
       const result = await loadLyric();
       setMode("lyric");
@@ -78,20 +80,24 @@ function LyricTile() {
 
       if (!authChecked.current) {
         authChecked.current = true;
+        if (!cancelled) {
+          await refresh();
+        }
         try {
           const authed = await invoke<boolean>("spotify_is_authenticated");
           if (!authed) {
             setConnecting(true);
             await invoke("spotify_login");
+            if (!cancelled) {
+              await refresh();
+            }
           }
         } catch (err) {
           console.error("[spotify] login failed:", err);
         } finally {
           setConnecting(false);
         }
-      }
-
-      if (!cancelled) {
+      } else if (!cancelled) {
         await refresh();
       }
     })();

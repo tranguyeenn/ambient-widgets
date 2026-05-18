@@ -4,8 +4,8 @@ use tauri::AppHandle;
 
 use crate::spotify::auth::{ensure_access_token, refresh_access_token};
 use crate::spotify::config::SpotifyConfig;
-use crate::spotify::error::SpotifyError;
-use crate::spotify::tokens::{load, save};
+use crate::spotify::error::{SpotifyError, is_revoked_refresh};
+use crate::spotify::tokens::{clear, load, save};
 
 #[derive(Debug, Clone)]
 pub struct NowPlaying {
@@ -59,7 +59,14 @@ pub async fn fetch_now_playing(app: &AppHandle) -> Result<NowPlaying, SpotifyErr
         let refresh_token = stored
             .refresh_token
             .ok_or(SpotifyError::NotAuthenticated)?;
-        let refreshed = refresh_access_token(&config, &refresh_token).await?;
+        let refreshed = match refresh_access_token(&config, &refresh_token).await {
+            Ok(tokens) => tokens,
+            Err(err) if is_revoked_refresh(&err) => {
+                let _ = clear(app);
+                return Err(SpotifyError::NotAuthenticated);
+            }
+            Err(err) => return Err(err),
+        };
         access_token = refreshed.access_token.clone();
         save(app, &refreshed)?;
         response = currently_playing_request(&client, &access_token).await?;
