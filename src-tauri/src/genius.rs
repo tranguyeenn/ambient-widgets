@@ -71,8 +71,33 @@ fn genius_token() -> Result<String, GeniusError> {
 
 pub async fn fetch_lyric_candidates(song: &str, artist: &str) -> Result<Vec<String>, GeniusError> {
     let token = genius_token()?;
-    let best = search_best_match(&token, song, artist).await?;
+    let best = search_best_match(&token, song, artist, false).await?;
     let lyrics = fetch_lyrics_from_url(&best.url).await?;
+    lyrics_to_candidates(lyrics)
+}
+
+/// Genius English Translation page for HAN — Hold My Hand.
+pub const HOLD_MY_HAND_ENGLISH_URL: &str =
+    "https://genius.com/Genius-english-translations-han-of-stray-kids-hold-my-hand-english-translation-lyrics";
+
+pub async fn fetch_lyric_candidates_from_url(url: &str) -> Result<Vec<String>, GeniusError> {
+    let lyrics = fetch_lyrics_from_url(url).await?;
+    lyrics_to_candidates(lyrics)
+}
+
+/// Prefer Genius "English Translation" pages over the original Korean lyrics.
+pub async fn fetch_lyric_candidates_english(song: &str, artist: &str) -> Result<Vec<String>, GeniusError> {
+    if let Ok(candidates) = fetch_lyric_candidates_from_url(HOLD_MY_HAND_ENGLISH_URL).await {
+        return Ok(candidates);
+    }
+
+    let token = genius_token()?;
+    let best = search_best_match(&token, song, artist, true).await?;
+    let lyrics = fetch_lyrics_from_url(&best.url).await?;
+    lyrics_to_candidates(lyrics)
+}
+
+fn lyrics_to_candidates(lyrics: String) -> Result<Vec<String>, GeniusError> {
     let lines = split_lyrics(&lyrics);
     let candidates = meaningful_lines(&lines);
 
@@ -87,8 +112,17 @@ async fn search_best_match(
     token: &str,
     song: &str,
     artist: &str,
+    prefer_english: bool,
 ) -> Result<RankedSong, GeniusError> {
-    let query = format!("{} {}", normalize_title(song), artist.trim());
+    let query = if prefer_english {
+        format!(
+            "{} {} english translation",
+            normalize_title(song),
+            artist.trim()
+        )
+    } else {
+        format!("{} {}", normalize_title(song), artist.trim())
+    };
     let client = Client::new();
 
     let response = client
@@ -110,9 +144,14 @@ async fn search_best_match(
         .hits
         .into_iter()
         .map(|hit| {
+            let title_lower = hit.result.title.to_lowercase();
             let title_score = title_similarity(song, &hit.result.title);
             let artist_score = artist_similarity(artist, &hit.result.primary_artist.name);
-            let score = title_score * 0.55 + artist_score * 0.45;
+            let mut score = title_score * 0.55 + artist_score * 0.45;
+
+            if prefer_english && title_lower.contains("english translation") {
+                score += 0.45;
+            }
 
             RankedSong {
                 url: hit.result.url,

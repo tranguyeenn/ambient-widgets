@@ -18,12 +18,30 @@ pub struct LyricResult {
     pub source: Option<String>,
 }
 
-pub fn fallback_lyric() -> LyricResult {
+const HOLD_MY_HAND_COVER: &str = "/hold-my-hand-cover.png";
+const HOLD_MY_HAND_SONG: &str = "Hold My Hand";
+const HOLD_MY_HAND_ARTIST: &str = "HAN";
+const HOLD_MY_HAND_LINE_BACKUP: &str =
+    "'Cause all I want is you, not your tears";
+
+async fn hold_my_hand_fallback() -> LyricResult {
+    let line = match genius::fetch_lyric_candidates_english(HOLD_MY_HAND_SONG, HOLD_MY_HAND_ARTIST).await
+    {
+        Ok(candidates) => candidates
+            .first()
+            .cloned()
+            .unwrap_or_else(|| HOLD_MY_HAND_LINE_BACKUP.to_string()),
+        Err(err) => {
+            eprintln!("[fallback] Hold My Hand genius: {err}");
+            HOLD_MY_HAND_LINE_BACKUP.to_string()
+        }
+    };
+
     LyricResult {
-        line: "Every night fucks every day up".into(),
-        song: "Nights".into(),
-        artist: "Frank Ocean".into(),
-        album_art: None,
+        line,
+        song: HOLD_MY_HAND_SONG.into(),
+        artist: HOLD_MY_HAND_ARTIST.into(),
+        album_art: Some(HOLD_MY_HAND_COVER.into()),
         source: Some("fallback".into()),
     }
 }
@@ -101,7 +119,7 @@ pub async fn get_current_lyric(app: AppHandle) -> LyricResult {
             if should_log_spotify_error(&err) {
                 eprintln!("[spotify] {err}");
             }
-            return fallback_lyric();
+            return hold_my_hand_fallback().await;
         }
     };
 
@@ -120,7 +138,7 @@ pub async fn get_current_lyric(app: AppHandle) -> LyricResult {
             if should_log_genius_error(&err) {
                 eprintln!("[genius] {err}");
             }
-            fallback_lyric()
+            hold_my_hand_fallback().await
         }
     }
 }

@@ -8,7 +8,7 @@
 get_now_playing (Spotify)
     │
     ├─ fail ──► fallback_lyric()
-    │              (hardcoded line in commands.rs — Frank Ocean / "Nights")
+    │              → `hold_my_hand_fallback()` (Genius: Hold My Hand / HAN + bundled cover)
     │
     └─ ok ──► cache::get_rotated(app, track)
               │
