@@ -20,10 +20,11 @@ Detailed guides for how Ambient Widgets is built and how it runs at runtime. Sta
 ## Runtime
 
 - [runtime-startup.md](./runtime-startup.md) — app launch, macOS policy, plugins
-- [runtime-windows.md](./runtime-windows.md) — lyric & calendar windows, drag, window state
+- [runtime-windows.md](./runtime-windows.md) — lyric, calendar & weather windows, drag, window state
 - [runtime-ipc.md](./runtime-ipc.md) — `invoke` commands (frontend ↔ Rust)
 - [runtime-lyrics-widget.md](./runtime-lyrics-widget.md) — 15s poll loop, lyric vs quote mode
 - [runtime-spotify.md](./runtime-spotify.md) — PKCE OAuth, tokens, now playing
 - [runtime-genius-cache.md](./runtime-genius-cache.md) — Genius fetch, lyric filter, per-track cache
-- [runtime-zenquotes.md](./runtime-zenquotes.md) — quote mode, CORS, fallback
+- [runtime-quotes.md](./runtime-quotes.md) — DummyJSON quote mode (lyrics widget)
+- [runtime-weather.md](./runtime-weather.md) — Open-Meteo, geolocation, themes
 - [runtime-calendar.md](./runtime-calendar.md) — calendar widget (frontend only)

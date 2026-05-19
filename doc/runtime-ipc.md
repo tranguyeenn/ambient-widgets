@@ -2,13 +2,14 @@
 
 Frontend calls Rust via Tauri `invoke()` (`@tauri-apps/api/core`). Commands are registered in `main.rs` and implemented in `commands.rs` and submodules.
 
+Weather and quote mode use **browser `fetch()`** only — no IPC.
+
 ## Command reference
 
 | Command | Frontend | Returns | Rust behavior |
 |---------|----------|---------|---------------|
 | `get_now_playing_track` | `src/lib/nowPlaying.ts`, `LyricTile` | Track or `null` | Spotify Web API — current playback |
 | `get_current_lyric` | `LyricTile` | `LyricResult` | Now playing → cache → Genius → fallback |
-| `fetch_zen_quote` | `src/lib/quoteApi.ts` | `Quote` | ZenQuotes HTTP |
 | `spotify_is_authenticated` | `LyricTile` | `boolean` | Valid token on disk |
 | `spotify_login` | `LyricTile` | `()` or error | PKCE OAuth flow |
 
@@ -23,7 +24,7 @@ Frontend calls Rust via Tauri `invoke()` (`@tauri-apps/api/core`). Commands are 
 |---------|----------|
 | `getNowPlayingTrack()` | Returns `null` |
 | `loadLyric()` / `get_current_lyric` | `FALLBACK_LYRIC` |
-| `fetchQuoteFromZenQuotes()` | `null` → local fallback quote |
+| `getRandomQuote()` | Random calming fallback string |
 | `spotify_login` | Logged; UI shows connect state |
 
 ## Adding a new command
@@ -39,5 +40,6 @@ Frontend calls Rust via Tauri `invoke()` (`@tauri-apps/api/core`). Commands are 
 - [runtime-lyrics-widget.md](./runtime-lyrics-widget.md)
 - [runtime-spotify.md](./runtime-spotify.md)
 - [runtime-genius-cache.md](./runtime-genius-cache.md)
-- [runtime-zenquotes.md](./runtime-zenquotes.md)
+- [runtime-quotes.md](./runtime-quotes.md)
+- [runtime-weather.md](./runtime-weather.md)
 - [rust-tauri.md](./rust-tauri.md)

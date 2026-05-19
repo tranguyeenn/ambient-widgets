@@ -15,7 +15,6 @@ main()
     │       .plugin(tauri_plugin_opener)
     │       .invoke_handler([
     │           get_current_lyric,
-    │           fetch_zen_quote,
     │           get_now_playing_track,
     │           spotify_is_authenticated,
     │           spotify_login,
@@ -37,9 +36,10 @@ Loaded from `src-tauri/.env` (see `.env.example`):
 | `SPOTIFY_CLIENT_ID` | OAuth |
 | `SPOTIFY_REDIRECT_URI` | OAuth callback (default `http://127.0.0.1:8888/callback`) |
 | `GENIUS_ACCESS_TOKEN` | Lyric search |
-| `ZENQUOTES_API_KEY` | Optional; higher rate limits |
 
 Missing Spotify/Genius config surfaces as graceful errors (quote mode, fallbacks) — not a crash at startup.
+
+Weather and quotes do not use `.env` — see [runtime-weather.md](./runtime-weather.md), [runtime-quotes.md](./runtime-quotes.md).
 
 ## macOS activation policy
 

@@ -10,7 +10,7 @@ Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React*
 
 | | Calendar | Lyrics | Weather |
 | --- | --- | --- | --- |
-| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable | Current conditions, today's high/low, and location via [Open-Meteo](https://open-meteo.com) (no API key) |
+| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable | Current conditions, today's high/low, condition-themed background; [Open-Meteo](https://open-meteo.com) + **Use my location** (Atlanta fallback) |
 | **Launch** | Opens with the app | Opens with the app | Opens with the app |
 | **Resize** | Yes — drag window edges; content scales with size | Yes | Yes (112×112 square min – 480×480 max) |
 | **Position memory** | Restored on next launch | Restored on next launch | Restored on next launch |
@@ -33,6 +33,7 @@ Vite serves the UI on **http://localhost:1420**; Tauri opens the native windows.
 npm run dev
 # http://localhost:1420/pages/calendar.html
 # http://localhost:1420/pages/lyrics.html
+# http://localhost:1420/pages/weather.html
 ```
 
 **Production macOS app:**
@@ -82,7 +83,8 @@ In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior liv
 | Lyrics widget (poll loop) | [runtime-lyrics-widget.md](./doc/runtime-lyrics-widget.md) |
 | Spotify OAuth | [runtime-spotify.md](./doc/runtime-spotify.md) |
 | Genius & lyric cache | [runtime-genius-cache.md](./doc/runtime-genius-cache.md) |
-| DummyJSON & quote mode | [runtime-zenquotes.md](./doc/runtime-zenquotes.md) |
+| DummyJSON & quote mode | [runtime-quotes.md](./doc/runtime-quotes.md) |
+| Weather widget | [runtime-weather.md](./doc/runtime-weather.md) |
 | Calendar widget | [runtime-calendar.md](./doc/runtime-calendar.md) |
 
 ---
@@ -188,16 +190,25 @@ ambient-widgets/
 ├── doc/                       # build & runtime guides (see doc/README.md)
 ├── pages/
 │   ├── calendar.html
-│   └── lyrics.html
+│   ├── lyrics.html
+│   └── weather.html
 ├── src/
 │   ├── calendar.tsx
 │   ├── lyrics.tsx
+│   ├── weather.tsx
 │   ├── components/
 │   │   ├── CalendarWidget.tsx / .css
-│   │   └── LyricTile.tsx / .css
+│   │   ├── LyricTile.tsx / .css
+│   │   └── WeatherWidget.tsx / .css
 │   ├── lib/
-│   │   ├── nowPlaying.ts      # get_now_playing_track wrapper
-│   │   └── quoteApi.ts        # DummyJSON quotes + quote-mode cache
+│   │   ├── nowPlaying.ts
+│   │   ├── quoteApi.ts
+│   │   ├── weatherApi.ts
+│   │   ├── weatherCodes.ts
+│   │   ├── weatherTheme.ts
+│   │   ├── weatherLocation.ts
+│   │   ├── locationStorage.ts
+│   │   └── userLocation.ts
 │   ├── utils/
 │   │   ├── calendar.ts
 │   │   └── lyricFallback.ts
@@ -208,6 +219,7 @@ ambient-widgets/
 │       └── widget-shell.css
 ├── src-tauri/
 │   ├── app-icon.png
+│   ├── Info.plist             # macOS location permission (weather)
 │   ├── .env.example
 │   ├── src/
 │   │   ├── main.rs
@@ -238,7 +250,7 @@ npx tauri icon src-tauri/app-icon.png -o src-tauri/icons
 
 ## Roadmap (ideas)
 
-More widgets (weather, tasks, clock), tray menu, autostart plugin—kept small and ambient.
+More widgets (tasks, clock), tray menu, autostart plugin—kept small and ambient.
 
 ---
 

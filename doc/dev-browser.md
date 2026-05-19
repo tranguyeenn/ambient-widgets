@@ -17,6 +17,7 @@ vite (reads vite.config.ts)
     ├─► Multi-page inputs:
     │       pages/lyrics.html   → /src/lyrics.tsx
     │       pages/calendar.html → /src/calendar.tsx
+    │       pages/weather.html  → /src/weather.tsx
     └─► Watches src/, pages/ — ignores src-tauri/**
 ```
 
@@ -24,6 +25,7 @@ vite (reads vite.config.ts)
 
 - http://localhost:1420/pages/calendar.html
 - http://localhost:1420/pages/lyrics.html
+- http://localhost:1420/pages/weather.html
 
 ## What works / what does not
 
@@ -31,7 +33,8 @@ vite (reads vite.config.ts)
 |---------|-------------|-----------|
 | Calendar grid, navigation | Yes | Yes |
 | Transparent frameless window | No | Yes |
-| `invoke(...)` / Spotify / Genius / ZenQuotes | No | Yes |
+| `invoke(...)` / Spotify / Genius | No | Yes |
+| Weather / Open-Meteo / geolocation | Yes (fetch) | Yes |
 | Window position memory | No | Yes |
 
 Lyrics page may show loading or fallbacks because `invoke` is unavailable outside Tauri.

@@ -44,7 +44,7 @@ Shared window flags: `transparent`, `decorations: false`, `visibleOnAllWorkspace
 | `tauri` | App lifecycle, commands, windows |
 | `tauri-plugin-window-state` | Save size/position per window label |
 | `tauri-plugin-opener` | Open URLs (Spotify login fallback) |
-| `reqwest` | HTTP (Spotify, Genius, ZenQuotes) |
+| `reqwest` | HTTP (Spotify, Genius) |
 | `tiny_http` | Local OAuth callback server |
 | `tokio` | Async command handlers |
 | `scraper` / `regex` | Genius HTML + lyric filtering |
@@ -55,7 +55,7 @@ Shared window flags: `transparent`, `decorations: false`, `visibleOnAllWorkspace
 
 **Capability:** `src-tauri/capabilities/default.json`
 
-- Windows: `lyric`, `calendar`
+- Windows: `lyric`, `calendar`, `weather`
 - Includes: `core:default`, window drag, opener, window-state, custom commands
 
 **Custom permissions** (`src-tauri/permissions/*.toml`):
@@ -64,7 +64,6 @@ Shared window flags: `transparent`, `decorations: false`, `visibleOnAllWorkspace
 |---------------|----------------|
 | `allow-get-current-lyric` | `get_current_lyric` |
 | `allow-get-now-playing-track` | `get_now_playing_track` |
-| `allow-fetch-zen-quote` | `fetch_zen_quote` |
 | `allow-spotify-login` | `spotify_login` |
 | `allow-spotify-is-authenticated` | `spotify_is_authenticated` |
 
@@ -78,7 +77,6 @@ src-tauri/src/
 ├── commands.rs       # #[tauri::command] handlers
 ├── spotify/          # OAuth, tokens, now playing API
 ├── genius.rs         # lyric search/scrape
-├── zenquotes.rs      # quote API
 ├── lyric_filter.rs   # line filtering
 └── cache.rs          # per-track line rotation
 ```
