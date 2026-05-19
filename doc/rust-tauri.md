@@ -39,9 +39,10 @@ fn main() {
 `app.security.csp` allows:
 
 - `connect-src`: Open-Meteo, BigDataCloud, DummyJSON, dev server (`localhost:1420`)
+- `img-src`: `https://i.scdn.co` (Spotify album art in the lyric widget)
 - Tauri IPC: `ipc:`, `http://ipc.localhost`
 
-Required for weather and quote `fetch()` in release webviews.
+Required for weather and quote `fetch()` in release webviews, and for `<img src="…">` album art from Spotify.
 
 ## Window definitions
 

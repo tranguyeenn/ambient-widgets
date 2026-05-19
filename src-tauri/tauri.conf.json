@@ -98,7 +98,7 @@
       "csp": {
         "default-src": "'self' asset: http://asset.localhost",
         "connect-src": "'self' ipc: http://ipc.localhost https://api.open-meteo.com https://api.bigdatacloud.net https://dummyjson.com http://localhost:1420 ws://localhost:1420",
-        "img-src": "'self' asset: http://asset.localhost blob: data:",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https://i.scdn.co",
         "style-src": "'unsafe-inline' 'self'"
       }
     }
