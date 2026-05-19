@@ -1,0 +1,598 @@
+/* Scoped styles aligned with Orbit widget CSS (glass shells, calendar grid, weather). */
+
+.orbit-desktop {
+  position: relative;
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: 1rem;
+  background:
+    radial-gradient(ellipse 90% 70% at 30% 20%, rgba(45, 212, 191, 0.06), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(99, 102, 241, 0.08), transparent 45%),
+    linear-gradient(160deg, #0a0e18 0%, #050810 55%, #0c101a 100%);
+}
+
+.orbit-desktop__wallpaper {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.orbit-desktop__toolbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(8, 12, 20, 0.85);
+  padding: 0.65rem 1rem;
+  backdrop-filter: blur(12px);
+}
+
+.orbit-desktop__toolbar-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.orbit-desktop__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.orbit-desktop__tool-btn {
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.9);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.orbit-desktop__tool-btn:hover {
+  border-color: rgba(94, 234, 212, 0.35);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.orbit-desktop__tool-btn--active {
+  border-color: rgba(94, 234, 212, 0.45);
+  background: rgba(94, 234, 212, 0.12);
+  color: rgb(165, 243, 252);
+}
+
+.orbit-desktop__stage {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  min-height: 0;
+  padding: 1.25rem;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "lyric"
+    "row"
+    "calendar"
+    "nudge";
+}
+
+@media (min-width: 768px) {
+  .orbit-desktop__stage {
+    padding: 1.5rem 1.75rem 2rem;
+    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "lyric calendar"
+      "row calendar"
+      "nudge nudge";
+  }
+}
+
+.orbit-desktop__widget {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.orbit-desktop__widget--lyric {
+  grid-area: lyric;
+  max-width: 420px;
+}
+
+.orbit-desktop__widget-row {
+  grid-area: row;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.orbit-desktop__widget--weather {
+  width: 148px;
+  flex-shrink: 0;
+}
+
+.orbit-desktop__widget--calendar {
+  grid-area: calendar;
+  min-height: 300px;
+}
+
+.orbit-desktop__widget--nudge {
+  grid-area: nudge;
+  max-width: 360px;
+  z-index: 12;
+}
+
+@media (min-width: 768px) {
+  .orbit-desktop__widget--nudge {
+    justify-self: start;
+  }
+}
+
+/* Shared glass widget shell */
+.demo-widget-glass {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  overflow: hidden;
+  border-radius: 14px;
+  color: rgba(245, 245, 247, 0.95);
+  background: rgba(14, 14, 16, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+}
+
+.demo-widget-glass__chrome {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: grab;
+}
+
+.demo-widget-glass__chrome:active {
+  cursor: grabbing;
+}
+
+/* Calendar */
+.demo-cal__chrome {
+  padding: 10px 12px 8px;
+}
+
+.demo-cal__nav-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-cal__nav-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(245, 245, 247, 0.88);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.demo-cal__nav-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.demo-cal__title {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.demo-cal__month {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.demo-cal__year {
+  font-size: 12px;
+  color: rgba(245, 245, 247, 0.45);
+}
+
+.demo-cal__body {
+  flex: 1;
+  padding: 8px 12px 12px;
+}
+
+.demo-cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.demo-cal__weekday {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 247, 0.38);
+}
+
+.demo-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.demo-cal__cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(245, 245, 247, 0.88);
+  cursor: pointer;
+}
+
+.demo-cal__cell--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.demo-cal__cell:not(.demo-cal__cell--empty):not(.demo-cal__cell--today):hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.demo-cal__cell--selected:not(.demo-cal__cell--today) {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.demo-cal__cell--today {
+  color: #0a0a0b;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(29, 185, 84, 0.55),
+    0 0 12px rgba(29, 185, 84, 0.22);
+}
+
+/* Lyric tile */
+.demo-lyric__chrome {
+  padding: 12px 16px 10px;
+}
+
+.demo-lyric__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.demo-lyric__song {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-lyric__artist {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: rgba(245, 245, 247, 0.45);
+  white-space: nowrap;
+}
+
+.demo-lyric__mode-label {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: rgba(245, 245, 247, 0.38);
+}
+
+.demo-lyric__body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  min-height: 72px;
+}
+
+.demo-lyric__art-wrap {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.demo-lyric__art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.demo-lyric__art--placeholder {
+  background: linear-gradient(145deg, #2d3a4f 0%, #1a2230 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.demo-lyric__art--placeholder::after {
+  content: "♪";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 18px;
+  opacity: 0.5;
+}
+
+.demo-lyric__icon {
+  font-size: 22px;
+  opacity: 0.88;
+}
+
+.demo-lyric__line {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(245, 245, 247, 0.92);
+}
+
+.demo-lyric__line--quote {
+  white-space: pre-line;
+}
+
+/* Weather */
+.demo-weather {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 140px;
+  color: rgba(255, 255, 255, 0.97);
+  background: linear-gradient(165deg, #5a6472 0%, #7a8796 42%, #9aa8b8 100%);
+}
+
+.demo-weather__glass {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 140px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+}
+
+.demo-weather__chrome {
+  padding: 10px 12px 6px;
+  cursor: grab;
+}
+
+.demo-weather__location {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.demo-weather__updated {
+  margin: 2px 0 0;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.demo-weather__locate {
+  margin-top: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.demo-weather__body {
+  flex: 1;
+  padding: 4px 12px 12px;
+}
+
+.demo-weather__temp {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.demo-weather__condition {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.demo-weather__range {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Welcome overlay */
+.demo-welcome {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(88, 110, 140, 0.28), transparent 55%),
+    radial-gradient(90% 70% at 80% 100%, rgba(72, 92, 118, 0.18), transparent 50%),
+    linear-gradient(165deg, #12141a 0%, #0c0d11 48%, #101218 100%);
+  animation: demo-fade-in 0.35s ease-out;
+}
+
+.demo-welcome__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 420px;
+  text-align: center;
+  gap: 14px;
+}
+
+.demo-welcome__greeting {
+  margin: 0;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.demo-welcome__message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(245, 245, 247, 0.72);
+}
+
+.demo-welcome__date {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 247, 0.4);
+}
+
+.demo-welcome__primary {
+  margin-top: 8px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0a0a0b;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.demo-welcome__primary:hover {
+  background: #fff;
+}
+
+/* Focus nudge */
+.demo-nudge {
+  border-radius: 14px;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  background: rgba(14, 14, 16, 0.72);
+  padding: 14px 16px;
+  backdrop-filter: blur(24px);
+  animation: demo-slide-up 0.3s ease-out;
+}
+
+.demo-nudge__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(253, 224, 171, 0.9);
+}
+
+.demo-nudge__text {
+  margin: 8px 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(254, 243, 199, 0.85);
+}
+
+.demo-nudge__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.demo-nudge__btn {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+  cursor: pointer;
+}
+
+.demo-nudge__btn:hover {
+  border-color: rgba(94, 234, 212, 0.35);
+  background: rgba(94, 234, 212, 0.1);
+}
+
+.demo-nudge__feedback {
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+@keyframes demo-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

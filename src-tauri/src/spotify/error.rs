@@ -33,6 +33,20 @@ pub enum SpotifyError {
     Io(#[from] std::io::Error),
 }
 
+/// True for rate limits and gateway blips (503 overflow/timeouts) — safe to retry.
+pub fn is_transient(err: &SpotifyError) -> bool {
+    match err {
+        SpotifyError::Http(http) => http.is_timeout() || http.is_connect() || http.is_request(),
+        SpotifyError::Api(body) => {
+            body.starts_with("status 429:")
+                || body.starts_with("status 502:")
+                || body.starts_with("status 503:")
+                || body.starts_with("status 504:")
+        }
+        _ => false,
+    }
+}
+
 /// True when Spotify rejected the refresh token (user revoked app access, password reset, etc.).
 pub fn is_revoked_refresh(err: &SpotifyError) -> bool {
     matches!(

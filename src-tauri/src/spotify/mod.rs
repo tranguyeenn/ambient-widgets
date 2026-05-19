@@ -6,7 +6,7 @@ mod tokens;
 
 pub use api::{fetch_now_playing, NowPlaying};
 pub use auth::login;
-pub use error::SpotifyError;
+pub use error::{is_transient, SpotifyError};
 pub use tokens::is_authenticated;
 
 use tauri::AppHandle;

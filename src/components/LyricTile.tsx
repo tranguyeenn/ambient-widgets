@@ -11,8 +11,8 @@ import type { LyricResult } from "../types/lyric";
 import { FALLBACK_LYRIC } from "../utils/lyricFallback";
 import "./LyricTile.css";
 
-/** Refresh tile content every 15s (quote cache uses the same window). */
-const POLL_MS = QUOTE_REFRESH_MS;
+/** Spotify poll interval (quote cache uses the same window). */
+const SPOTIFY_POLL_MS = QUOTE_REFRESH_MS;
 
 type TileMode = "lyric" | "quote";
 
@@ -32,34 +32,51 @@ function LyricTile() {
   const [connecting, setConnecting] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const authChecked = useRef(false);
+  const fetchGeneration = useRef(0);
+  const lyricRef = useRef<LyricResult | null>(null);
+  const authenticatedRef = useRef(false);
+  lyricRef.current = lyric;
+  authenticatedRef.current = authenticated;
 
   const onDragMouseDown = () => {
     void getCurrentWindow().startDragging();
   };
 
-  const refresh = async () => {
+  const fetchSpotifyAsync = async () => {
+    const generation = ++fetchGeneration.current;
+
     const track = await getNowPlayingTrack();
+    if (generation !== fetchGeneration.current) return;
 
     // After now-playing, so a revoked refresh token is cleared in Rust first.
     try {
       const authed = await invoke<boolean>("spotify_is_authenticated");
+      if (generation !== fetchGeneration.current) return;
+      authenticatedRef.current = authed;
       setAuthenticated(authed);
     } catch {
+      if (generation !== fetchGeneration.current) return;
+      authenticatedRef.current = false;
       setAuthenticated(false);
     }
 
     if (track) {
       const result = await loadLyric();
+      if (generation !== fetchGeneration.current) return;
       setMode("lyric");
       setLyric(result);
       setQuoteText(null);
+    } else if (authenticatedRef.current && lyricRef.current) {
+      // Spotify 503/429 blip — keep last lyric instead of flipping to quotes.
     } else {
       const quote = await getRandomQuote();
+      if (generation !== fetchGeneration.current) return;
       setMode("quote");
       setQuoteText(quote);
       setLyric(null);
     }
 
+    if (generation !== fetchGeneration.current) return;
     setLoading(false);
   };
 
@@ -67,7 +84,7 @@ function LyricTile() {
     setConnecting(true);
     try {
       await invoke("spotify_login");
-      await refresh();
+      await fetchSpotifyAsync();
     } catch (err) {
       console.error("[spotify] login failed:", err);
     } finally {
@@ -77,6 +94,7 @@ function LyricTile() {
 
   useEffect(() => {
     let cancelled = false;
+    const fetchSpotify = () => void fetchSpotifyAsync();
 
     void (async () => {
       setLoading(true);
@@ -84,7 +102,7 @@ function LyricTile() {
       if (!authChecked.current) {
         authChecked.current = true;
         if (!cancelled) {
-          await refresh();
+          await fetchSpotifyAsync();
         }
         try {
           const authed = await invoke<boolean>("spotify_is_authenticated");
@@ -92,7 +110,7 @@ function LyricTile() {
             setConnecting(true);
             await invoke("spotify_login");
             if (!cancelled) {
-              await refresh();
+              await fetchSpotifyAsync();
             }
           }
         } catch (err) {
@@ -101,16 +119,15 @@ function LyricTile() {
           setConnecting(false);
         }
       } else if (!cancelled) {
-        await refresh();
+        await fetchSpotifyAsync();
       }
     })();
 
-    const interval = setInterval(() => {
-      void refresh();
-    }, POLL_MS);
+    const interval = setInterval(fetchSpotify, SPOTIFY_POLL_MS);
 
     return () => {
       cancelled = true;
+      fetchGeneration.current += 1;
       clearInterval(interval);
       setConnecting(false);
     };

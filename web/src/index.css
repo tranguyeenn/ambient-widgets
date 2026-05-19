@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-orbit-bg: #050810;
+  --color-orbit-surface: #0c1220;
+  --color-orbit-elevated: #121a2e;
+  --color-orbit-border: rgba(148, 163, 184, 0.12);
+  --color-orbit-cyan: #5eead4;
+  --color-orbit-cyan-dim: #2dd4bf;
+  --color-orbit-violet: #818cf8;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-orbit-bg font-sans text-slate-200 antialiased;
+  }
+
+  ::selection {
+    @apply bg-cyan-500/30 text-white;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-orbit-border bg-orbit-surface/70 backdrop-blur-xl;
+  }
+
+  .glass-strong {
+    @apply border border-white/10 bg-orbit-elevated/80 backdrop-blur-2xl;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-cyan-200 via-slate-100 to-violet-200 bg-clip-text text-transparent;
+  }
+
+  .hero-btn {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-3 text-center text-sm font-semibold transition;
+  }
+
+  .hero-btn--primary {
+    @apply bg-cyan-400 text-orbit-bg hover:bg-cyan-300;
+  }
+
+  .hero-btn--secondary {
+    @apply border border-white/15 bg-white/5 text-slate-100 hover:border-cyan-400/40 hover:bg-cyan-400/10;
+  }
+
+  .grid-fade {
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 20%, transparent 75%);
+  }
+}
+
+@keyframes orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-orbit-float {
+  animation: orbit-float 5s ease-in-out infinite;
+}
+
+@keyframes orbit-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-orbit-spin {
+  animation: orbit-spin 48s linear infinite;
+}
+
+.animate-orbit-spin-reverse {
+  animation: orbit-spin 64s linear infinite reverse;
+}
+
+.animate-orbit-pulse {
+  animation: orbit-pulse 6s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-orbit-spin,
+  .animate-orbit-spin-reverse,
+  .animate-orbit-pulse,
+  .animate-orbit-float,
+  .animate-fade-up {
+    animation: none;
+  }
+}

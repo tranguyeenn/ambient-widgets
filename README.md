@@ -60,6 +60,14 @@ Then open **Orbit** from Applications (or Spotlight). The release build uses an 
 
 ---
 
+## Web showcase
+
+A separate portfolio case-study site lives in **[`web/`](./web/README.md)**: a product landing page, not the widget UI.
+
+```bash
+cd web && npm install && npm run dev
+```
+
 ## Documentation
 
 In-depth guides live in **[`doc/`](./doc/README.md)**.

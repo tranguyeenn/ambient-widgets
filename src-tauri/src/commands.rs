@@ -172,7 +172,7 @@ fn should_log_spotify_error(err: &SpotifyError) -> bool {
             | SpotifyError::NotConfigured
             | SpotifyError::NothingPlaying
             | SpotifyError::NoActiveDevice
-    )
+    ) && !crate::spotify::is_transient(err)
 }
 
 fn should_log_genius_error(err: &GeniusError) -> bool {
