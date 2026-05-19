@@ -20,7 +20,8 @@ Detailed guides for how Orbit is built and how it runs at runtime. Start here, t
 ## Runtime
 
 - [runtime-startup.md](./runtime-startup.md) — app launch, macOS policy, plugins
-- [runtime-windows.md](./runtime-windows.md) — lyric, calendar & weather windows, drag, window state
+- [runtime-windows.md](./runtime-windows.md) — lyric, calendar, weather & welcome windows, drag, window state
+- [runtime-welcome.md](./runtime-welcome.md) — daily full-screen welcome overlay (once per day)
 - [runtime-ipc.md](./runtime-ipc.md) — `invoke` commands (frontend ↔ Rust)
 - [runtime-lyrics-widget.md](./runtime-lyrics-widget.md) — 15s poll loop, lyric vs quote mode
 - [runtime-spotify.md](./runtime-spotify.md) — PKCE OAuth, tokens, now playing

@@ -14,9 +14,9 @@ npm run build
     │         noEmit: true — typecheck only
     │
     └─2─► vite build
-              ├── Rollup multi-page (lyrics + calendar entries)
+              ├── Rollup multi-page (four entries)
               ├── React JSX → bundled JS
-              ├── CSS from components + widget-shell.css
+              ├── CSS from components + widget-shell.css / welcome-shell.css
               └── Output → dist/
 ```
 
@@ -26,9 +26,11 @@ npm run build
 dist/
 ├── pages/
 │   ├── lyrics.html
-│   └── calendar.html
+│   ├── calendar.html
+│   ├── weather.html
+│   └── welcome.html
 └── assets/
-    ├── index-*.js   (per-entry chunks, hashed)
+    ├── *-*.js   (per-entry chunks, hashed)
     └── *.css
 ```
 
@@ -38,19 +40,8 @@ Tauri reads this via `tauri.conf.json`:
 "frontendDist": "../dist"
 ```
 
-Release webviews load files from `dist/`, not the Vite dev server.
-
-## Keeping entries in sync
-
-When adding a widget, update **all** of:
-
-1. `pages/<name>.html`
-2. `src/<name>.tsx`
-3. `vite.config.ts` → `build.rollupOptions.input`
-4. `src-tauri/tauri.conf.json` → `app.windows[]`
-
 ## Related docs
 
+- [dev-browser.md](./dev-browser.md)
 - [build-release.md](./build-release.md)
-- [build-outputs.md](./build-outputs.md)
-- [architecture.md](./architecture.md)
+- [rust-tauri.md](./rust-tauri.md)

@@ -2,7 +2,7 @@
 
 **Command:** `npm run tauri dev`
 
-Use this for transparent windows, IPC, Spotify OAuth, lyrics, and quote mode.
+Use this for transparent windows, IPC, Spotify OAuth, lyrics, quote mode, weather location, and the daily welcome overlay.
 
 ## Flow
 
@@ -19,14 +19,17 @@ npm run tauri dev
     │         ├── build.rs → tauri_build::build()
     │         └── compiles src-tauri/src/*.rs
     │
-    └─3─► Launch native process
+    └─3─► Launch native process (orbit)
               ├── Load src-tauri/.env (dotenvy)
-              ├── Plugins: window-state, opener
+              ├── Plugins: geolocation, window-state, opener
               ├── Register IPC commands
               ├── macOS: normal activation policy (Dock visible)
+              ├── Show lyric, calendar, weather; hide welcome
               └── Windows from tauri.conf.json:
                       lyric    → http://localhost:1420/pages/lyrics.html
                       calendar → http://localhost:1420/pages/calendar.html
+                      weather  → http://localhost:1420/pages/weather.html
+                      welcome  → http://localhost:1420/pages/welcome.html
 ```
 
 ## Hot reload
@@ -47,8 +50,9 @@ Rust changes require the Tauri dev process to rebuild (CLI usually handles this 
 |----------|-------------|-------------------------|
 | Dock icon | Yes | No (accessory policy) |
 | ⌘⇥ app switcher | Yes | No |
+| Welcome overlay | Can re-show same day after restart (session gate) | Once per calendar day |
 
-See [runtime-startup.md](./runtime-startup.md).
+See [runtime-startup.md](./runtime-startup.md), [runtime-welcome.md](./runtime-welcome.md).
 
 ## Related docs
 

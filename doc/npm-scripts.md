@@ -8,8 +8,8 @@ Defined in root `package.json`.
 | `build` | `tsc && vite build` | Typecheck + production frontend → `dist/` |
 | `preview` | `vite preview` | Serve `dist/` locally (no Tauri) |
 | `tauri` | `tauri` | Pass-through to Tauri CLI |
-| `open:dmg` | `open src-tauri/target/release/bundle/dmg/*.dmg` | Open built DMG after release |
-| `install:mac` | `ditto … → /Applications/` | Copy `.app` into Applications |
+| `open:dmg` | shell helper | Open `Orbit_*.dmg` after release (errors if not built yet) |
+| `install:mac` | `ditto …` | Copy `Orbit.app` → `/Applications/Orbit.app` |
 
 ## Tauri CLI (via `npm run tauri …`)
 

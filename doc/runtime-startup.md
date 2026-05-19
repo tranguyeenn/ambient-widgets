@@ -11,7 +11,8 @@ main()
     ├─► Optional: dotenvy::dotenv() from cwd
     │
     ├─► tauri::Builder::default()
-    │       .plugin(tauri_plugin_window_state)
+    │       .plugin(tauri_plugin_geolocation)
+    │       .plugin(tauri_plugin_window_state)  // welcome label denylisted
     │       .plugin(tauri_plugin_opener)
     │       .invoke_handler([
     │           get_current_lyric,
@@ -22,9 +23,14 @@ main()
     │
     ├─► setup(|app| { ... })
     │       ├─ macOS: default app menu (Quit via ⌘Q)
-    │       └─ release macOS: ActivationPolicy::Accessory
+    │       ├─ release macOS: ActivationPolicy::Accessory
+    │       ├─ hide welcome window
+    │       ├─ show lyric, calendar, weather
+    │       ├─ widget focus → emit daily-welcome-check
+    │       └─ thread: sleep 2s → emit daily-welcome-check
     │
     └─► Run event loop → create windows → load webviews
+            └─ Resumed → emit daily-welcome-check
 ```
 
 ## Environment variables
@@ -39,7 +45,7 @@ Loaded from `src-tauri/.env` (see `.env.example`):
 
 Missing Spotify/Genius config surfaces as graceful errors (quote mode, fallbacks) — not a crash at startup.
 
-Weather and quotes do not use `.env` — see [runtime-weather.md](./runtime-weather.md), [runtime-quotes.md](./runtime-quotes.md).
+Weather, quotes, and welcome do not use `.env` — see [runtime-weather.md](./runtime-weather.md), [runtime-quotes.md](./runtime-quotes.md), [runtime-welcome.md](./runtime-welcome.md).
 
 ## macOS activation policy
 
@@ -51,5 +57,6 @@ Weather and quotes do not use `.env` — see [runtime-weather.md](./runtime-weat
 ## Related docs
 
 - [runtime-windows.md](./runtime-windows.md)
+- [runtime-welcome.md](./runtime-welcome.md)
 - [runtime-ipc.md](./runtime-ipc.md)
 - [rust-tauri.md](./rust-tauri.md)

@@ -2,17 +2,18 @@
 
 Configured in `src-tauri/tauri.conf.json` → `app.windows`.
 
-## Three independent windows
+## Four windows
 
-| Label | Title | Webview URL |
-|-------|-------|-------------|
-| `lyric` | Lyrics | `pages/lyrics.html` |
-| `calendar` | Calendar | `pages/calendar.html` |
-| `weather` | Weather | `pages/weather.html` |
+| Label | Title | Webview URL | On launch |
+|-------|-------|-------------|-----------|
+| `lyric` | Lyrics | `pages/lyrics.html` | Visible |
+| `calendar` | Calendar | `pages/calendar.html` | Visible |
+| `weather` | Weather | `pages/weather.html` | Visible |
+| `welcome` | Welcome | `pages/welcome.html` | Hidden until daily check |
 
-Each has its own webview process context. Size and position are persisted separately via `tauri-plugin-window-state` (keyed by `label`).
+Each widget has its own webview context. Size and position are persisted via `tauri-plugin-window-state` (keyed by `label`). The **welcome** label is on the plugin denylist so it is not restored to an old size/position.
 
-## Window chrome
+## Widget chrome
 
 | Setting | Value | Effect |
 |---------|-------|--------|
@@ -22,6 +23,8 @@ Each has its own webview process context. Size and position are persisted separa
 | `visibleOnAllWorkspaces` | `true` | Shows on every Space |
 | `resizable` | `true` | User can resize; content scales |
 | `alwaysOnTop` | `false` | Normal desktop layering (click to focus) |
+
+Welcome window: opaque background, not resizable, `alwaysOnTop` only while shown. See [runtime-welcome.md](./runtime-welcome.md).
 
 Requires `macOSPrivateApi: true` in Tauri config for transparency on macOS.
 
@@ -48,12 +51,13 @@ Requires capability permission `core:window:allow-start-dragging`.
 2. Vite `input` entry
 3. New block in `tauri.conf.json` `windows`
 4. Add window label to `capabilities/default.json` → `windows`
-5. Grant any new IPC permissions in `permissions/*.toml` (if needed)
+5. Grant any new IPC or plugin permissions (if needed)
 
 ## Related docs
 
 - [architecture.md](./architecture.md)
 - [dev-tauri.md](./dev-tauri.md)
+- [runtime-welcome.md](./runtime-welcome.md)
 - [runtime-calendar.md](./runtime-calendar.md)
 - [runtime-lyrics-widget.md](./runtime-lyrics-widget.md)
 - [runtime-weather.md](./runtime-weather.md)

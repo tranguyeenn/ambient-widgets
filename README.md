@@ -1,20 +1,21 @@
 # Orbit
 
-Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. Spotify and Genius run through the Rust shell; quotes use [DummyJSON](https://dummyjson.com) from the frontend—no separate backend server.
+Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. A **daily welcome overlay** greets you once per day, then disappears to reveal the widgets on your desktop.
+
+Spotify and Genius run through the Rust shell; quotes use [DummyJSON](https://dummyjson.com) from the frontend—no separate backend server.
 
 ![App icon](src-tauri/app-icon.png)
 
 ---
 
-## Widgets
+## Widgets & welcome
 
-| | Calendar | Lyrics | Weather |
-| --- | --- | --- | --- |
-| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable | Current conditions, today's high/low, condition-themed background; [Open-Meteo](https://open-meteo.com) + **Use my location** (Atlanta fallback) |
-| **Launch** | Opens with the app | Opens with the app | Opens with the app |
-| **Resize** | Yes — drag window edges; content scales with size | Yes | Yes (112×112 square min – 480×480 max) |
-| **Position memory** | Restored on next launch | Restored on next launch | Restored on next launch |
-| **Chrome** | Frameless glass card, drag via header | Same | Condition-themed gradient + glass overlay |
+| | Calendar | Lyrics | Weather | Daily welcome |
+| --- | --- | --- | --- | --- |
+| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable | Current conditions, today's high/low, condition-themed background; [Open-Meteo](https://open-meteo.com) + location (Lawrenceville area default) | Full-screen **Hello Trang!** + calm daily message; **Start the day** dismisses until tomorrow |
+| **Launch** | Opens with the app | Opens with the app | Opens with the app | Once per day (hidden window until needed) |
+| **Resize** | Yes — drag window edges | Yes | Yes (112×112 – 480×480) | Full monitor overlay (not resizable) |
+| **Position memory** | Restored on next launch | Restored on next launch | Restored on next launch | Not persisted |
 
 ---
 
@@ -25,7 +26,7 @@ npm install
 npm run tauri dev
 ```
 
-Vite serves the UI on **http://localhost:1420**; Tauri opens the native windows.
+Vite serves the UI on **http://localhost:1420**; Tauri opens the native windows (widgets first, then welcome if not shown today).
 
 **Browser-only (no Tauri):**
 
@@ -34,6 +35,7 @@ npm run dev
 # http://localhost:1420/pages/calendar.html
 # http://localhost:1420/pages/lyrics.html
 # http://localhost:1420/pages/weather.html
+# http://localhost:1420/pages/welcome.html
 ```
 
 **Production macOS app:**
@@ -50,11 +52,8 @@ Outputs (not copied to `/Applications` automatically):
 Install either way:
 
 ```bash
-# Drag Orbit.app from the .dmg to Applications
-npm run open:dmg
-
-# Or copy from the terminal (after build)
-npm run install:mac
+npm run open:dmg    # opens DMG if built; otherwise prints a hint
+npm run install:mac # copy Orbit.app → /Applications/Orbit.app
 ```
 
 Then open **Orbit** from Applications (or Spotlight). The release build uses an accessory activation policy, so it may not appear in the Dock—use Spotlight or Login Items to launch it.
@@ -63,29 +62,19 @@ Then open **Orbit** from Applications (or Spotlight). The release build uses an 
 
 ## Documentation
 
-In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior live in **[`doc/`](./doc/README.md)**.
+In-depth guides live in **[`doc/`](./doc/README.md)**.
 
 | Topic | Guide |
 | --- | --- |
 | Index | [doc/README.md](./doc/README.md) |
 | Architecture | [architecture.md](./doc/architecture.md) |
-| Build outputs (`dist/`, `target/`, …) | [build-outputs.md](./doc/build-outputs.md) |
+| Daily welcome | [runtime-welcome.md](./doc/runtime-welcome.md) |
+| Weather & location | [runtime-weather.md](./doc/runtime-weather.md) |
+| Build outputs | [build-outputs.md](./doc/build-outputs.md) |
 | npm scripts | [npm-scripts.md](./doc/npm-scripts.md) |
-| Browser dev (`npm run dev`) | [dev-browser.md](./doc/dev-browser.md) |
-| Native dev (`npm run tauri dev`) | [dev-tauri.md](./doc/dev-tauri.md) |
-| Frontend build | [build-frontend.md](./doc/build-frontend.md) |
-| Release build & install | [build-release.md](./doc/build-release.md) |
-| Rust, Tauri, permissions | [rust-tauri.md](./doc/rust-tauri.md) |
-| App icons | [icons.md](./doc/icons.md) |
-| Startup & macOS policy | [runtime-startup.md](./doc/runtime-startup.md) |
-| Windows & webviews | [runtime-windows.md](./doc/runtime-windows.md) |
-| IPC commands | [runtime-ipc.md](./doc/runtime-ipc.md) |
-| Lyrics widget (poll loop) | [runtime-lyrics-widget.md](./doc/runtime-lyrics-widget.md) |
-| Spotify OAuth | [runtime-spotify.md](./doc/runtime-spotify.md) |
-| Genius & lyric cache | [runtime-genius-cache.md](./doc/runtime-genius-cache.md) |
-| DummyJSON & quote mode | [runtime-quotes.md](./doc/runtime-quotes.md) |
-| Weather widget | [runtime-weather.md](./doc/runtime-weather.md) |
-| Calendar widget | [runtime-calendar.md](./doc/runtime-calendar.md) |
+| Native dev | [dev-tauri.md](./doc/dev-tauri.md) |
+| Release build | [build-release.md](./doc/build-release.md) |
+| Rust & Tauri | [rust-tauri.md](./doc/rust-tauri.md) |
 
 ---
 
@@ -94,7 +83,24 @@ In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior liv
 - **Node + npm** — frontend tooling
 - **Rust + Tauri v2** — [prerequisites](https://v2.tauri.app/start/prerequisites/)
 - **Spotify + Genius** (lyric mode) — API credentials in `src-tauri/.env` (see below)
-- **DummyJSON** (quote mode) — fetched from the webview; no API key required
+- **Location** (weather) — allow **Orbit** in **System Settings → Privacy & Security → Location Services**
+- **DummyJSON** (quote mode) — no API key
+
+---
+
+## Daily welcome
+
+- Shown **once per local calendar day** after launch or when returning to the desktop (not on the lock screen / password UI).
+- Stored in `localStorage` as `orbit:lastWelcomeShownDate` (`YYYY-MM-DD`).
+- **Dismiss:** tap **Start the day** — overlay hides; lyric, calendar, and weather stay on screen.
+- **Dev:** **Show again today** link under the button; or reset in the **welcome webview** devtools console (not the terminal):
+
+  ```js
+  localStorage.removeItem('orbit:lastWelcomeShownDate')
+  sessionStorage.removeItem('orbit:welcome-shown-session')
+  ```
+
+See [doc/runtime-welcome.md](./doc/runtime-welcome.md).
 
 ---
 
@@ -125,28 +131,37 @@ The tile polls every **15 seconds**:
 
 1. **Spotify first** — `get_now_playing_track` checks for a current track.
 2. **Lyric mode** — if a track is playing, `get_current_lyric` fetches a filtered Genius line (with per-track cache rotation).
-3. **Quote mode** — if Spotify is off, disconnected, errors, or nothing is playing, the UI switches to **quote mode** (subtle label in the header). Quotes are fetched from DummyJSON (`getRandomQuote` in `quoteApi.ts`). A new quote is requested each refresh window (~15s in-memory cache). If the API fails, a random calming fallback message is shown.
+3. **Quote mode** — if Spotify is off, disconnected, errors, or nothing is playing, the UI switches to **quote mode**. Quotes come from DummyJSON. If the API fails, a random calming fallback is shown.
 
 **Connect Spotify** appears in quote mode when you are not authenticated.
+
+---
+
+## Weather
+
+- Loads **immediately** for saved GPS or a **Lawrenceville, GA** area default, then refines when location is granted.
+- **Use my location** requests permission via `@tauri-apps/plugin-geolocation` (native app) or the browser API in Vite-only dev.
+- City name from reverse geocode prefers **locality** (e.g. Lawrenceville) over metro name (e.g. Atlanta).
+
+See [doc/runtime-weather.md](./doc/runtime-weather.md).
 
 ---
 
 ## Calendar
 
 - Starts on the **current system month**
-- **‹ ›** buttons move month-by-month across all years (Dec → Jan rolls the year)
+- **‹ ›** buttons move month-by-month across all years
 - **Today** is always highlighted
 - **Click** a day to select it; selection persists when you change months
-- Leap years and weekday alignment are handled in `src/utils/calendar.ts`
 
 ---
 
 ## macOS behavior
 
-- **Release `.app`:** accessory activation policy — no Dock icon and no **⌘⇥** entry (desk-accessory feel). **`tauri dev`** keeps the normal policy so the app is easy to find while developing.
-- **Quit:** **⌘Q** when the app has focus (standard app menu includes Quit).
-- **All Spaces:** both widgets use `visibleOnAllWorkspaces`.
-- **Login at boot:** **System Settings → General → Login Items → Open at Login** — add **Orbit**.
+- **Release `.app`:** accessory activation policy — no Dock icon and no **⌘⇥** entry. **`tauri dev`** keeps the normal policy while developing.
+- **Quit:** **⌘Q** when the app has focus.
+- **All Spaces:** widgets and welcome use `visibleOnAllWorkspaces`.
+- **Login at boot:** **System Settings → General → Login Items** — add **Orbit**.
 
 ---
 
@@ -156,30 +171,15 @@ The tile polls every **15 seconds**:
 Frontend (React)                         Tauri (Rust)
 ─────────────────                        ────────────
 pages/calendar.html  ──►  calendar.tsx  ──►  CalendarWidget
-
-pages/lyrics.html    ──►  lyrics.tsx    ──►  LyricTile
-                                              │
-                    ┌─────────────────────────┴─────────────────────────┐
-                    ▼                                                   ▼
-         invoke("get_now_playing_track")              invoke("get_current_lyric")
-                    │                                                   │
-                    ▼                                                   ▼
-              spotify/ (PKCE, now playing)                         commands.rs
-                    │                                     ┌──────────┼──────────┐
-                    │ no track                            ▼          ▼          ▼
-                    ▼                              genius.rs    cache.rs   lyric_filter.rs
-         getRandomQuote()  ──►  fetch dummyjson.com/quotes/random
-         (src/lib/quoteApi.ts)
+pages/lyrics.html    ──►  lyrics.tsx    ──►  LyricTile  ──► Spotify / Genius IPC
+pages/weather.html   ──►  weather.tsx   ──►  WeatherWidget (Open-Meteo, geolocation plugin)
+pages/welcome.html   ──►  welcome.tsx   ──►  DailyWelcomeOverlay (daily-welcome-check event)
 ```
 
-- **Vite multi-page:** `pages/*.html` + `src/*.tsx` entries in `vite.config.ts`
-- **One window per widget** in `src-tauri/tauri.conf.json` (`calendar`, `lyric`)
-- **Window state:** `tauri-plugin-window-state` saves size and position per window
-- **Shared shell:** `src/styles/widget-shell.css` — transparent document, widgets fill their window
-
-**Add another widget:** new `pages/*.html` + `src/*.tsx` → Vite `input` → `tauri.conf.json` window block → `capabilities/default.json`
-
-See **[Documentation](#documentation)** for full build and runtime guides.
+- **Vite multi-page:** `pages/*.html` + `src/*.tsx` in `vite.config.ts`
+- **Four windows** in `tauri.conf.json` (`lyric`, `calendar`, `weather`, `welcome`)
+- **Window state:** `tauri-plugin-window-state` (welcome label denylisted)
+- **CSP:** allows Open-Meteo, BigDataCloud, DummyJSON in release builds
 
 ---
 
@@ -191,46 +191,28 @@ orbit/
 ├── pages/
 │   ├── calendar.html
 │   ├── lyrics.html
-│   └── weather.html
+│   ├── weather.html
+│   └── welcome.html
 ├── src/
-│   ├── calendar.tsx
-│   ├── lyrics.tsx
-│   ├── weather.tsx
+│   ├── calendar.tsx / lyrics.tsx / weather.tsx / welcome.tsx
 │   ├── components/
 │   │   ├── CalendarWidget.tsx / .css
 │   │   ├── LyricTile.tsx / .css
-│   │   └── WeatherWidget.tsx / .css
+│   │   ├── WeatherWidget.tsx / .css
+│   │   └── DailyWelcomeOverlay.tsx / .css
 │   ├── lib/
-│   │   ├── nowPlaying.ts
-│   │   ├── quoteApi.ts
-│   │   ├── weatherApi.ts
-│   │   ├── weatherCodes.ts
-│   │   ├── weatherTheme.ts
-│   │   ├── weatherLocation.ts
-│   │   ├── locationStorage.ts
-│   │   └── userLocation.ts
-│   ├── utils/
-│   │   ├── calendar.ts
-│   │   └── lyricFallback.ts
-│   ├── types/
-│   │   ├── lyric.ts
-│   │   └── nowPlaying.ts
+│   │   ├── dailyWelcome.ts
+│   │   ├── weatherApi.ts / weatherLocation.ts / locationStorage.ts / userLocation.ts
+│   │   ├── quoteApi.ts / nowPlaying.ts / …
 │   └── styles/
-│       └── widget-shell.css
+│       ├── widget-shell.css
+│       └── welcome-shell.css
+├── scripts/
+│   └── render-app-icon.py     # regenerate app-icon.png
 ├── src-tauri/
 │   ├── app-icon.png
-│   ├── Info.plist             # macOS location permission (weather)
-│   ├── .env.example
-│   ├── src/
-│   │   ├── main.rs
-│   │   ├── commands.rs
-│   │   ├── spotify/           # auth, tokens, now playing
-│   │   ├── genius.rs
-│   │   ├── lyric_filter.rs
-│   │   └── cache.rs
-│   ├── permissions/
-│   ├── capabilities/
-│   ├── icons/
+│   ├── Info.plist             # NSLocationWhenInUseUsageDescription
+│   ├── src/main.rs
 │   └── tauri.conf.json
 ├── vite.config.ts
 └── package.json
@@ -240,11 +222,14 @@ orbit/
 
 ## App icon
 
-Replace `src-tauri/app-icon.png` (1024×1024 PNG recommended), then:
+Regenerate from the script (deep space + orbit ring), then bundle icons:
 
 ```bash
+python3 scripts/render-app-icon.py
 npx tauri icon src-tauri/app-icon.png -o src-tauri/icons
 ```
+
+See [doc/icons.md](./doc/icons.md).
 
 ---
 

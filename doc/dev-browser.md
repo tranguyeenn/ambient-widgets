@@ -18,6 +18,7 @@ vite (reads vite.config.ts)
     │       pages/lyrics.html   → /src/lyrics.tsx
     │       pages/calendar.html → /src/calendar.tsx
     │       pages/weather.html  → /src/weather.tsx
+    │       pages/welcome.html  → /src/welcome.tsx
     └─► Watches src/, pages/ — ignores src-tauri/**
 ```
 
@@ -26,6 +27,7 @@ vite (reads vite.config.ts)
 - http://localhost:1420/pages/calendar.html
 - http://localhost:1420/pages/lyrics.html
 - http://localhost:1420/pages/weather.html
+- http://localhost:1420/pages/welcome.html
 
 ## What works / what does not
 
@@ -34,7 +36,9 @@ vite (reads vite.config.ts)
 | Calendar grid, navigation | Yes | Yes |
 | Transparent frameless window | No | Yes |
 | `invoke(...)` / Spotify / Genius | No | Yes |
-| Weather / Open-Meteo / geolocation | Yes (fetch) | Yes |
+| Weather / Open-Meteo | Yes (fetch) | Yes |
+| Weather location (GPS) | Browser geolocation API | Tauri geolocation plugin |
+| Daily welcome overlay | UI only (no native window chrome) | Full-screen window |
 | Window position memory | No | Yes |
 
 Lyrics page may show loading or fallbacks because `invoke` is unavailable outside Tauri.
