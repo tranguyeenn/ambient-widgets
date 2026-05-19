@@ -1,4 +1,4 @@
-# Ambient Widgets
+# Orbit
 
 Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. Spotify and Genius run through the Rust shell; quotes use [DummyJSON](https://dummyjson.com) from the frontend—no separate backend server.
 
@@ -44,20 +44,20 @@ npm run tauri build
 
 Outputs (not copied to `/Applications` automatically):
 
-- `src-tauri/target/release/bundle/macos/Ambient Widgets.app`
-- `src-tauri/target/release/bundle/dmg/Ambient Widgets_0.1.0_aarch64.dmg`
+- `src-tauri/target/release/bundle/macos/Orbit.app`
+- `src-tauri/target/release/bundle/dmg/Orbit_0.1.0_aarch64.dmg`
 
 Install either way:
 
 ```bash
-# Drag Ambient Widgets.app from the .dmg to Applications
+# Drag Orbit.app from the .dmg to Applications
 npm run open:dmg
 
 # Or copy from the terminal (after build)
 npm run install:mac
 ```
 
-Then open **Ambient Widgets** from Applications (or Spotlight). The release build uses an accessory activation policy, so it may not appear in the Dock—use Spotlight or Login Items to launch it.
+Then open **Orbit** from Applications (or Spotlight). The release build uses an accessory activation policy, so it may not appear in the Dock—use Spotlight or Login Items to launch it.
 
 ---
 
@@ -146,7 +146,7 @@ The tile polls every **15 seconds**:
 - **Release `.app`:** accessory activation policy — no Dock icon and no **⌘⇥** entry (desk-accessory feel). **`tauri dev`** keeps the normal policy so the app is easy to find while developing.
 - **Quit:** **⌘Q** when the app has focus (standard app menu includes Quit).
 - **All Spaces:** both widgets use `visibleOnAllWorkspaces`.
-- **Login at boot:** **System Settings → General → Login Items → Open at Login** — add **Ambient Widgets**.
+- **Login at boot:** **System Settings → General → Login Items → Open at Login** — add **Orbit**.
 
 ---
 
@@ -186,7 +186,7 @@ See **[Documentation](#documentation)** for full build and runtime guides.
 ## Project layout
 
 ```text
-ambient-widgets/
+orbit/
 ├── doc/                       # build & runtime guides (see doc/README.md)
 ├── pages/
 │   ├── calendar.html
@@ -250,7 +250,7 @@ npx tauri icon src-tauri/app-icon.png -o src-tauri/icons
 
 ## Roadmap (ideas)
 
-More widgets (tasks, clock), tray menu, autostart plugin—kept small and ambient.
+More widgets (tasks, clock), tray menu, autostart plugin—kept small and focused.
 
 ---
 

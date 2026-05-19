@@ -3,6 +3,6 @@
 <plist version="1.0">
   <dict>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Ambient Widgets uses your location to show local weather in the weather widget.</string>
+    <string>Orbit uses your location to show local weather in the weather widget.</string>
   </dict>
 </plist>

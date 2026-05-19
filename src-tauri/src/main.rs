@@ -7,13 +7,39 @@ mod genius;
 mod lyric_filter;
 mod spotify;
 
+use tauri::{Emitter, Manager};
+
+const WELCOME_CHECK_EVENT: &str = "daily-welcome-check";
+
+fn emit_welcome_check(app: &tauri::AppHandle) {
+    let _ = app.emit(WELCOME_CHECK_EVENT, ());
+}
+
+fn attach_welcome_triggers(app: &tauri::AppHandle) {
+    for (label, window) in app.webview_windows() {
+        if label == "welcome" {
+            continue;
+        }
+        let handle = app.clone();
+        window.on_window_event(move |event| {
+            if let tauri::WindowEvent::Focused(true) = event {
+                emit_welcome_check(&handle);
+            }
+        });
+    }
+}
+
 fn main() {
     let env_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
     let _ = dotenvy::from_path(&env_path);
     let _ = dotenvy::dotenv();
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_denylist(&["welcome"])
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::get_current_lyric,
@@ -33,11 +59,18 @@ fn main() {
                 .handle()
                 .set_activation_policy(tauri::ActivationPolicy::Accessory)
             {
-                eprintln!("[ambient-widgets] set_activation_policy: {err}");
+                eprintln!("[orbit] set_activation_policy: {err}");
             }
+
+            attach_welcome_triggers(app.handle());
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            if matches!(event, tauri::RunEvent::Resumed) {
+                emit_welcome_check(&app_handle);
+            }
+        });
 }

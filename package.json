@@ -1,5 +1,5 @@
 {
-  "name": "ambient-widgets",
+  "name": "orbit",
   "description": "Tauri desktop shell + Vite/React/TypeScript UI. npm run dev = web only; npm run tauri dev = native window + dev server; npm run build = typecheck + production bundle to dist/; npm run tauri build = full app.",
   "private": true,
   "version": "0.1.0",
@@ -9,8 +9,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "open:dmg": "open src-tauri/target/release/bundle/dmg/*.dmg",
-    "install:mac": "ditto \"src-tauri/target/release/bundle/macos/Ambient Widgets.app\" \"/Applications/Ambient Widgets.app\""
+    "open:dmg": "sh -c 'dmg=$(ls src-tauri/target/release/bundle/dmg/*.dmg 2>/dev/null | head -1); if [ -z \"$dmg\" ]; then echo \"No DMG found. Run: npm run tauri build\"; exit 1; fi; open \"$dmg\"'",
+    "install:mac": "ditto \"src-tauri/target/release/bundle/macos/Orbit.app\" \"/Applications/Orbit.app\""
   },
   "dependencies": {
     "react": "^19.1.0",

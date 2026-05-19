@@ -1,6 +1,7 @@
 import type { Coordinates } from "./weatherApi";
 
-const STORAGE_KEY = "ambient-widgets.weather-location";
+const LEGACY_STORAGE_KEY = "ambient-widgets.weather-location";
+const STORAGE_KEY = "orbit.weather-location";
 
 export type SavedUserLocation = Coordinates & {
   savedAt: number;
@@ -21,7 +22,22 @@ function isSavedUserLocation(value: unknown): value is SavedUserLocation {
   );
 }
 
+function migrateLegacyStorageKey(): void {
+  try {
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, legacy);
+    }
+    if (legacy) {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function getSavedUserLocation(): SavedUserLocation | null {
+  migrateLegacyStorageKey();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -48,6 +64,7 @@ export function saveUserLocation(coords: Coordinates): void {
 export function clearSavedUserLocation(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     /* ignore */
   }

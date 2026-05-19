@@ -21,7 +21,7 @@ const HOLD_MY_HAND_SONG: &str = "Hold My Hand";
 const HOLD_MY_HAND_ARTIST: &str = "HAN";
 const HOLD_MY_HAND_LINE_BACKUP: &str =
     "'Cause all I want is you, not your tears";
-const HOLD_MY_HAND_CACHE_ID: &str = "ambient:fallback:hold-my-hand";
+const HOLD_MY_HAND_CACHE_ID: &str = "orbit:fallback:hold-my-hand";
 
 fn hold_my_hand_stub() -> NowPlaying {
     NowPlaying {

@@ -23,7 +23,7 @@ Position and size persist via `tauri-plugin-window-state` (same as lyric/calenda
 | File | Role |
 |------|------|
 | `src/lib/weatherLocation.ts` | Atlanta default, resolve saved vs default, `activateMyLocation()` |
-| `src/lib/locationStorage.ts` | `localStorage` persistence for user lat/lon |
+| `src/lib/locationStorage.ts` | `localStorage` persistence (`orbit.weather-location`) for user lat/lon |
 | `src/lib/userLocation.ts` | Browser Geolocation API wrapper |
 | `src/lib/weatherApi.ts` | Fetch forecast + location name |
 | `src/lib/weatherCodes.ts` | WMO code → label + category |

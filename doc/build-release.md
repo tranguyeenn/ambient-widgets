@@ -19,16 +19,16 @@ npm run tauri build
               ├── targets: "all"
               ├── Icons: src-tauri/icons/
               └── macOS:
-                      Ambient Widgets.app
-                      Ambient Widgets_0.1.0_aarch64.dmg
+                      Orbit.app
+                      Orbit_0.1.0_aarch64.dmg
 ```
 
 ## Output paths
 
 | Artifact | Path |
 |----------|------|
-| App bundle | `src-tauri/target/release/bundle/macos/Ambient Widgets.app` |
-| Disk image | `src-tauri/target/release/bundle/dmg/Ambient Widgets_0.1.0_aarch64.dmg` |
+| App bundle | `src-tauri/target/release/bundle/macos/Orbit.app` |
+| Disk image | `src-tauri/target/release/bundle/dmg/Orbit_0.1.0_aarch64.dmg` |
 
 These paths are gitignored — see [build-outputs.md](./build-outputs.md).
 
@@ -42,7 +42,7 @@ npm run open:dmg
 npm run install:mac
 ```
 
-Then launch **Ambient Widgets** from Applications or Spotlight.
+Then launch **Orbit** from Applications or Spotlight.
 
 ## Release-only macOS behavior
 
@@ -54,7 +54,7 @@ In `src-tauri/src/main.rs`, release builds set:
 
 ## Login at boot
 
-**System Settings → General → Login Items → Open at Login** — add Ambient Widgets.
+**System Settings → General → Login Items → Open at Login** — add Orbit.
 
 ## Related docs
 

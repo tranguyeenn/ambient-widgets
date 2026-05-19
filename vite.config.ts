@@ -4,6 +4,7 @@
  * - `pages/lyrics.html` → lyric widget WebView
  * - `pages/calendar.html` → calendar widget WebView
  * - `pages/weather.html` → weather widget WebView
+ * - `pages/welcome.html` → daily welcome overlay WebView
  *
  * `TAURI_DEV_HOST` is set when developing against a physical device so HMR can reach it.
  */
@@ -30,6 +31,7 @@ export default defineConfig(async () => ({
         lyrics: path.resolve(__dirname, "pages/lyrics.html"),
         calendar: path.resolve(__dirname, "pages/calendar.html"),
         weather: path.resolve(__dirname, "pages/weather.html"),
+        welcome: path.resolve(__dirname, "pages/welcome.html"),
       },
     },
   },

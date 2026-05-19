@@ -1,6 +1,6 @@
 # Documentation
 
-Detailed guides for how Ambient Widgets is built and how it runs at runtime. Start here, then open the topic you need.
+Detailed guides for how Orbit is built and how it runs at runtime. Start here, then open the topic you need.
 
 ## Architecture
 

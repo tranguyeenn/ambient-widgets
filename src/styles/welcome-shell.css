@@ -1,0 +1,13 @@
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.welcome-page {
+  overflow: hidden;
+  background: #0c0d11;
+}

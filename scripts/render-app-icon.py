@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render premium app-icon.png (1024×1024, transparent squircle corners)."""
+"""Render Orbit app-icon.png (1024×1024, transparent squircle corners)."""
 
 from __future__ import annotations
 
@@ -28,23 +28,23 @@ def lerp_color(c1: tuple[int, int, int], c2: tuple[int, int, int], t: float) -> 
 
 
 def make_background() -> Image.Image:
-    """Ambient navy field with soft top-left lift and edge vignette."""
+    """Deep space field with a soft nebula lift and edge vignette."""
     yy, xx = np.mgrid[0:SIZE, 0:SIZE].astype(np.float32)
-    lx, ly = SIZE * 0.38, SIZE * 0.36
-    light = np.exp(-(((xx - lx) ** 2 + (yy - ly) ** 2) / (2 * (SIZE * 0.42) ** 2)))
+    lx, ly = SIZE * 0.34, SIZE * 0.32
+    light = np.exp(-(((xx - lx) ** 2 + (yy - ly) ** 2) / (2 * (SIZE * 0.38) ** 2)))
     radial = np.sqrt((xx - SIZE / 2) ** 2 + (yy - SIZE / 2) ** 2) / (SIZE * 0.62)
     radial = np.clip(radial, 0, 1)
 
-    inner = np.array([42.0, 46.0, 74.0])
-    mid = np.array([28.0, 31.0, 52.0])
-    deep = np.array([16.0, 18.0, 32.0])
+    inner = np.array([22.0, 38.0, 68.0])
+    mid = np.array([12.0, 20.0, 42.0])
+    deep = np.array([6.0, 8.0, 18.0])
 
     bg = inner * (1 - radial[..., None]) + mid * radial[..., None]
-    bg = bg * (0.88 + 0.12 * light[..., None]) + deep * (1 - light[..., None]) * 0.08
+    bg = bg * (0.9 + 0.1 * light[..., None]) + deep * (1 - light[..., None]) * 0.12
 
     corner = np.maximum(np.abs(xx - SIZE / 2), np.abs(yy - SIZE / 2)) / (SIZE / 2)
     vign = np.clip((corner - 0.55) * 2.0, 0, 1)
-    bg = bg * (1 - 0.28 * vign[..., None]) + deep * (0.28 * vign[..., None])
+    bg = bg * (1 - 0.32 * vign[..., None]) + deep * (0.32 * vign[..., None])
 
     rgba = np.zeros((SIZE, SIZE, 4), dtype=np.uint8)
     rgba[:, :, :3] = np.clip(bg, 0, 255).astype(np.uint8)
@@ -95,65 +95,35 @@ def draw_gradient_arc(
 
     for i in range(len(points) - 1):
         x1, y1, c1 = points[i]
-        x2, y2, c2 = points[i + 1]
+        x2, y2, _c2 = points[i + 1]
         draw.line([(x1, y1), (x2, y2)], fill=c1, width=width, joint="curve")
 
 
 def draw_glow_dot(layer: Image.Image, x: float, y: float, r: int) -> None:
     glow = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     gdraw = ImageDraw.Draw(glow)
-    for scale, alpha in [(2.8, 38), (1.9, 62), (1.35, 110)]:
+    for scale, alpha in [(2.8, 42), (1.9, 72), (1.35, 120)]:
         gr = int(r * scale)
-        gdraw.ellipse((x - gr, y - gr, x + gr, y + gr), fill=(186, 168, 255, alpha))
+        gdraw.ellipse((x - gr, y - gr, x + gr, y + gr), fill=(120, 220, 255, alpha))
     glow = glow.filter(ImageFilter.GaussianBlur(radius=10))
     layer.alpha_composite(glow)
 
     draw = ImageDraw.Draw(layer)
     draw.ellipse(
         (x - r, y - r, x + r, y + r),
-        fill=(228, 214, 255, 255),
+        fill=(210, 245, 255, 255),
     )
     highlight_r = max(4, r // 4)
     draw.ellipse(
         (x - r * 0.25, y - r * 0.55, x - r * 0.25 + highlight_r, y - r * 0.55 + highlight_r),
-        fill=(255, 252, 255, 180),
+        fill=(255, 255, 255, 200),
     )
-
-
-def draw_gradient_bar(
-    layer: Image.Image,
-    cx: float,
-    cy: float,
-    width: float,
-    height: float,
-    c_left: tuple[int, int, int],
-    c_right: tuple[int, int, int],
-) -> None:
-    x0, y0 = cx - width / 2, cy - height / 2
-    x1, y1 = cx + width / 2, cy + height / 2
-    bar = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    pixels = bar.load()
-    radius = height / 2
-    for y in range(int(y0) - 2, int(y1) + 3):
-        for x in range(int(x0) - 2, int(x1) + 3):
-            if x < 0 or y < 0 or x >= SIZE or y >= SIZE:
-                continue
-            dx = max(abs(x - cx) - (width / 2 - radius), 0)
-            dy = max(abs(y - cy) - radius, 0)
-            if dx * dx + dy * dy <= radius * radius:
-                t = (x - x0) / max(width, 1)
-                color = lerp_color(c_left, c_right, t)
-                pixels[x, y] = (*color, 255)
-    layer.alpha_composite(bar)
 
 
 def render() -> Image.Image:
     base = make_background()
-
-    # Foreground layer
     fg = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 
-    # Composition — optically centered, tighter crop
     cx, cy = SIZE / 2, SIZE * 0.505
     arc_rx, arc_ry = 278, 262
     arc_cy = cy - 28
@@ -164,52 +134,44 @@ def render() -> Image.Image:
         int(arc_cy + arc_ry),
     )
 
-    lavender = (210, 188, 255)
-    periwinkle = (124, 158, 255)
-    ice = (240, 232, 255)
+    cyan = (140, 230, 255)
+    teal = (56, 170, 220)
+    ice = (220, 248, 255)
 
-    # Soft ring halo (depth, not gloss)
+    # Outer faint orbit
+    outer_bbox = (
+        int(cx - arc_rx * 1.08),
+        int(arc_cy - arc_ry * 1.08),
+        int(cx + arc_rx * 1.08),
+        int(arc_cy + arc_ry * 1.08),
+    )
+    draw_gradient_arc(fg, outer_bbox, 200, -30, 5, (40, 90, 130), (70, 120, 170))
+
+    # Soft ring halo
     halo = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    draw_gradient_arc(halo, bbox, 205, -25, 28, lavender, periwinkle)
-    halo = halo.filter(ImageFilter.GaussianBlur(radius=11))
-    # Tone down halo without muddying RGBA channels
+    draw_gradient_arc(halo, bbox, 205, -25, 30, cyan, teal)
+    halo = halo.filter(ImageFilter.GaussianBlur(radius=12))
     h_arr = np.array(halo, dtype=np.float32)
-    h_arr[:, :, 3] *= 0.38
+    h_arr[:, :, 3] *= 0.42
     halo = Image.fromarray(np.clip(h_arr, 0, 255).astype(np.uint8), "RGBA")
     fg.alpha_composite(halo)
 
     # Primary orbit ring
-    draw_gradient_arc(fg, bbox, 208, -28, 14, ice, periwinkle)
-    draw_gradient_arc(fg, bbox, 208, -28, 7, (225, 210, 255), (148, 182, 255))
+    draw_gradient_arc(fg, bbox, 208, -28, 15, ice, teal)
+    draw_gradient_arc(fg, bbox, 208, -28, 7, (235, 252, 255), (100, 200, 245))
 
-    # Planet — upper-right inside arc (identity preserved)
+    # Satellite on the ring
     ang = math.radians(-38)
     dot_x = cx + arc_rx * 0.36 * math.cos(ang)
     dot_y = arc_cy + arc_ry * 0.34 * math.sin(ang)
-    draw_glow_dot(fg, dot_x, dot_y, 34)
+    draw_glow_dot(fg, dot_x, dot_y, 32)
 
-    # Reflection bars — sharper, balanced spacing
-    bar_h = 15
-    bar_gap = 30
-    base_y = arc_cy + arc_ry * 0.52
-    widths = (314, 214, 134)
-    for i, w in enumerate(widths):
-        draw_gradient_bar(
-            fg,
-            cx,
-            base_y + i * bar_gap,
-            w,
-            bar_h - i * 2,
-            lavender,
-            periwinkle,
-        )
-
-    # Subtle top atmospheric sheen
+    # Nebula sheen
     sheen = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     sdraw = ImageDraw.Draw(sheen)
     sdraw.ellipse(
         (cx - 320, arc_cy - 340, cx + 320, arc_cy + 40),
-        fill=(120, 140, 220, 22),
+        fill=(80, 160, 220, 28),
     )
     sheen = sheen.filter(ImageFilter.GaussianBlur(radius=48))
     base.alpha_composite(sheen)

@@ -16,8 +16,8 @@ Paths produced by installs and builds. Most are listed in the root `.gitignore` 
 
 Under `src-tauri/target/` (also gitignored):
 
-- `src-tauri/target/release/bundle/macos/Ambient Widgets.app`
-- `src-tauri/target/release/bundle/dmg/Ambient Widgets_0.1.0_aarch64.dmg`
+- `src-tauri/target/release/bundle/macos/Orbit.app`
+- `src-tauri/target/release/bundle/dmg/Orbit_0.1.0_aarch64.dmg`
 
 See [build-release.md](./build-release.md) for how to build and install these.
 

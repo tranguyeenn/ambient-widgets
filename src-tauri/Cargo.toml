@@ -3,9 +3,9 @@
 # Edition "2021" picks the Rust language version for the whole crate.
 
 [package]
-name = "ambient-widgets"
+name = "orbit"
 version = "0.1.0"
-description = "Ambient Widgets desktop app"
+description = "Orbit desktop app"
 authors = ["Trang Nguyen"]
 edition = "2021"
 
