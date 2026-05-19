@@ -51,6 +51,7 @@ body {
 }
 
 body.lyrics-page #root,
-body.calendar-page #root {
+body.calendar-page #root,
+body.weather-page #root {
   padding: 0;
 }

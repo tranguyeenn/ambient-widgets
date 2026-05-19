@@ -8,13 +8,13 @@ Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React*
 
 ## Widgets
 
-| | Calendar | Lyrics |
-| --- | --- | --- |
-| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable |
-| **Launch** | Opens with the app | Opens with the app |
-| **Resize** | Yes — drag window edges; content scales with size | Yes |
-| **Position memory** | Restored on next launch | Restored on next launch |
-| **Chrome** | Frameless glass card, drag via header | Same |
+| | Calendar | Lyrics | Weather |
+| --- | --- | --- | --- |
+| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable | Current conditions, today's high/low, and location via [Open-Meteo](https://open-meteo.com) (no API key) |
+| **Launch** | Opens with the app | Opens with the app | Opens with the app |
+| **Resize** | Yes — drag window edges; content scales with size | Yes | Yes (112×112 square min – 480×480 max) |
+| **Position memory** | Restored on next launch | Restored on next launch | Restored on next launch |
+| **Chrome** | Frameless glass card, drag via header | Same | Condition-themed gradient + glass overlay |
 
 ---
 

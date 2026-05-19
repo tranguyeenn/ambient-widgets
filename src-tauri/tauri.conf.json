@@ -48,6 +48,27 @@
         "center": false,
         "x": 520,
         "y": 80
+      },
+      {
+        "label": "weather",
+        "title": "Weather",
+        "url": "pages/weather.html",
+        "create": true,
+        "width": 160,
+        "height": 160,
+        "minWidth": 112,
+        "minHeight": 112,
+        "maxWidth": 480,
+        "maxHeight": 480,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": false,
+        "resizable": true,
+        "shadow": false,
+        "visibleOnAllWorkspaces": true,
+        "center": false,
+        "x": 360,
+        "y": 80
       }
     ],
     "security": {
