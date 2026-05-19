@@ -162,9 +162,7 @@ fn is_section_header(line: &str) -> bool {
 
 fn is_metadata_line(line: &str) -> bool {
     let lower = line.to_lowercase();
-    METADATA_MARKERS
-        .iter()
-        .any(|marker| lower.contains(marker))
+    METADATA_MARKERS.iter().any(|marker| lower.contains(marker))
 }
 
 fn is_repeated_adlib(line: &str) -> bool {
@@ -183,9 +181,7 @@ fn is_repeated_adlib(line: &str) -> bool {
 
 fn contains_offensive_word(line: &str) -> bool {
     let lower = line.to_lowercase();
-    OFFENSIVE_WORDS
-        .iter()
-        .any(|word| lower.contains(word))
+    OFFENSIVE_WORDS.iter().any(|word| lower.contains(word))
 }
 
 fn score_line(line: &str) -> f32 {
@@ -214,7 +210,9 @@ fn score_line(line: &str) -> f32 {
     }
 
     if trimmed.chars().filter(|ch| ch.is_alphabetic()).count() > 0
-        && trimmed.chars().all(|ch| !ch.is_lowercase() && ch.is_alphabetic())
+        && trimmed
+            .chars()
+            .all(|ch| !ch.is_lowercase() && ch.is_alphabetic())
     {
         score -= 1.0;
     }

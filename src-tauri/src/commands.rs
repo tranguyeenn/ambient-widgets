@@ -3,7 +3,7 @@ use tauri::AppHandle;
 
 use crate::cache::{self, CacheEntry};
 use crate::genius::{self, GeniusError};
-use crate::spotify::{NowPlaying, SpotifyError, login};
+use crate::spotify::{login, NowPlaying, SpotifyError};
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LyricResult {
@@ -19,8 +19,7 @@ pub struct LyricResult {
 const HOLD_MY_HAND_COVER: &str = "/hold-my-hand-cover.png";
 const HOLD_MY_HAND_SONG: &str = "Hold My Hand";
 const HOLD_MY_HAND_ARTIST: &str = "HAN";
-const HOLD_MY_HAND_LINE_BACKUP: &str =
-    "'Cause all I want is you, not your tears";
+const HOLD_MY_HAND_LINE_BACKUP: &str = "'Cause all I want is you, not your tears";
 const HOLD_MY_HAND_CACHE_ID: &str = "orbit:fallback:hold-my-hand";
 
 fn hold_my_hand_stub() -> NowPlaying {
@@ -39,7 +38,11 @@ async fn hold_my_hand_fallback(app: &AppHandle) -> LyricResult {
         return cache_entry_to_lyric(cached);
     }
 
-    let candidates = match genius::fetch_lyric_candidates_english(HOLD_MY_HAND_SONG, HOLD_MY_HAND_ARTIST).await
+    let candidates = match genius::fetch_lyric_candidates_english(
+        HOLD_MY_HAND_SONG,
+        HOLD_MY_HAND_ARTIST,
+    )
+    .await
     {
         Ok(c) if !c.is_empty() => c,
         Ok(_) => vec![HOLD_MY_HAND_LINE_BACKUP.to_string()],
@@ -89,9 +92,10 @@ fn track_lyric(now_playing: &NowPlaying, line: String, source: &str) -> LyricRes
     }
 }
 
-async fn lyric_from_genius(now_playing: &NowPlaying) -> Result<(LyricResult, Vec<String>), GeniusError> {
-    let candidates =
-        genius::fetch_lyric_candidates(&now_playing.song, &now_playing.artist).await?;
+async fn lyric_from_genius(
+    now_playing: &NowPlaying,
+) -> Result<(LyricResult, Vec<String>), GeniusError> {
+    let candidates = genius::fetch_lyric_candidates(&now_playing.song, &now_playing.artist).await?;
     let line = candidates
         .first()
         .cloned()

@@ -6,15 +6,20 @@ import {
 import { requestUserLocation } from "./userLocation";
 import type { Coordinates } from "./weatherApi";
 
-export const ATLANTA_COORDINATES: Coordinates = {
-  latitude: 33.749,
-  longitude: -84.388,
+/** Gwinnett County / Lawrenceville area default when location is unavailable. */
+export const DEFAULT_COORDINATES: Coordinates = {
+  latitude: 33.9562,
+  longitude: -83.988,
 };
 
-export const ATLANTA_LOCATION_NAME = "Atlanta";
+export const DEFAULT_LOCATION_NAME = "Lawrenceville";
 export const CURRENT_LOCATION_LABEL = "Current Location";
 
-export type WeatherLocationMode = "atlanta" | "user";
+/** @deprecated Use DEFAULT_* — kept for existing mode checks */
+export const ATLANTA_COORDINATES = DEFAULT_COORDINATES;
+export const ATLANTA_LOCATION_NAME = DEFAULT_LOCATION_NAME;
+
+export type WeatherLocationMode = "default" | "user";
 
 export type ResolvedWeatherLocation = {
   coords: Coordinates;
@@ -34,9 +39,9 @@ export function resolveWeatherLocation(): ResolvedWeatherLocation {
   }
 
   return {
-    coords: ATLANTA_COORDINATES,
-    mode: "atlanta",
-    fallbackLocationName: ATLANTA_LOCATION_NAME,
+    coords: DEFAULT_COORDINATES,
+    mode: "default",
+    fallbackLocationName: DEFAULT_LOCATION_NAME,
   };
 }
 
@@ -45,13 +50,13 @@ export type ActivateMyLocationResult =
   | { ok: false; notice: string; location: ResolvedWeatherLocation };
 
 /**
- * Requests browser geolocation, persists coords on success, or returns Atlanta fallback.
+ * Requests device location, persists coords on success, or returns area default.
  */
 export async function activateMyLocation(): Promise<ActivateMyLocationResult> {
-  const atlantaFallback: ResolvedWeatherLocation = {
-    coords: ATLANTA_COORDINATES,
-    mode: "atlanta",
-    fallbackLocationName: ATLANTA_LOCATION_NAME,
+  const defaultFallback: ResolvedWeatherLocation = {
+    coords: DEFAULT_COORDINATES,
+    mode: "default",
+    fallbackLocationName: DEFAULT_LOCATION_NAME,
   };
 
   const outcome = await requestUserLocation();
@@ -61,7 +66,7 @@ export async function activateMyLocation(): Promise<ActivateMyLocationResult> {
     return {
       ok: false,
       notice: outcome.message,
-      location: atlantaFallback,
+      location: defaultFallback,
     };
   }
 

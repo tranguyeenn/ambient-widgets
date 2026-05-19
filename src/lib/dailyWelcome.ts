@@ -67,13 +67,27 @@ export function getLastWelcomeShownDate(): string | null {
   }
 }
 
+const DEV_SESSION_KEY = "orbit:welcome-shown-session";
+
 export function shouldShowWelcome(now = new Date()): boolean {
-  return getLastWelcomeShownDate() !== getLocalDateKey(now);
+  const today = getLocalDateKey(now);
+  if (import.meta.env.DEV) {
+    try {
+      return sessionStorage.getItem(DEV_SESSION_KEY) !== today;
+    } catch {
+      return getLastWelcomeShownDate() !== today;
+    }
+  }
+  return getLastWelcomeShownDate() !== today;
 }
 
 export function markWelcomeShownToday(now = new Date()): void {
+  const today = getLocalDateKey(now);
   try {
-    localStorage.setItem(LAST_WELCOME_SHOWN_KEY, getLocalDateKey(now));
+    localStorage.setItem(LAST_WELCOME_SHOWN_KEY, today);
+    if (import.meta.env.DEV) {
+      sessionStorage.setItem(DEV_SESSION_KEY, today);
+    }
   } catch {
     /* ignore quota / private mode */
   }
@@ -82,6 +96,7 @@ export function markWelcomeShownToday(now = new Date()): void {
 export function clearWelcomeShownToday(): void {
   try {
     localStorage.removeItem(LAST_WELCOME_SHOWN_KEY);
+    sessionStorage.removeItem(DEV_SESSION_KEY);
   } catch {
     /* ignore */
   }

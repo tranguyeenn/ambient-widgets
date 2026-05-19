@@ -67,11 +67,12 @@ function isForecastResponse(value: unknown): value is ForecastResponse {
 }
 
 function parseReverseGeocodeName(data: ReverseGeocodeResponse): string | null {
-  const city = data.city?.trim() || data.locality?.trim();
-  if (!city) return null;
+  // Prefer locality (e.g. Lawrenceville) over metro city (e.g. Atlanta).
+  const place = data.locality?.trim() || data.city?.trim();
+  if (!place) return null;
 
   const region = data.principalSubdivision?.trim();
-  return region ? `${city}, ${region}` : city;
+  return region ? `${place}, ${region}` : place;
 }
 
 async function fetchLocationName(

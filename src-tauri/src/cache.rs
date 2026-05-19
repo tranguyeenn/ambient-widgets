@@ -48,11 +48,7 @@ pub fn cache_key(track_id: Option<&str>, artist: &str, title: &str) -> String {
         return format!("track:{track_id}");
     }
 
-    format!(
-        "meta:{}:{}",
-        normalize_key(artist),
-        normalize_key(title)
-    )
+    format!("meta:{}:{}", normalize_key(artist), normalize_key(title))
 }
 
 fn cache_path(app: &AppHandle) -> Result<PathBuf, CacheError> {
@@ -96,7 +92,10 @@ fn advance_entry(entry: &mut CacheEntry) {
     }
 }
 
-pub fn get_rotated(app: &AppHandle, now_playing: &NowPlaying) -> Result<Option<CacheEntry>, CacheError> {
+pub fn get_rotated(
+    app: &AppHandle,
+    now_playing: &NowPlaying,
+) -> Result<Option<CacheEntry>, CacheError> {
     let mut store = load_store(app)?;
     let key = cache_key(
         now_playing.track_id.as_deref(),

@@ -4,7 +4,7 @@ mod config;
 mod error;
 mod tokens;
 
-pub use api::{NowPlaying, fetch_now_playing};
+pub use api::{fetch_now_playing, NowPlaying};
 pub use auth::login;
 pub use error::SpotifyError;
 pub use tokens::is_authenticated;

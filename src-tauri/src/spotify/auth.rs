@@ -11,12 +11,11 @@ use tauri_plugin_opener::OpenerExt;
 use url::Url;
 
 use crate::spotify::config::SpotifyConfig;
-use crate::spotify::error::SpotifyError;
 use crate::spotify::error::is_revoked_refresh;
-use crate::spotify::tokens::{TokenResponse, TokenStore, clear, save};
+use crate::spotify::error::SpotifyError;
+use crate::spotify::tokens::{clear, save, TokenResponse, TokenStore};
 
-const PKCE_CHARSET: &[u8] =
-    b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+const PKCE_CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
 const SCOPES: &str = "user-read-currently-playing user-read-playback-state";
 
 static AUTH_IN_PROGRESS: Mutex<bool> = Mutex::new(false);
@@ -53,12 +52,17 @@ fn build_authorize_url(config: &SpotifyConfig, challenge: &str, state: &str) -> 
 fn callback_port(redirect_uri: &str) -> Result<u16, SpotifyError> {
     let redirect = Url::parse(redirect_uri)
         .map_err(|err| SpotifyError::AuthFailed(format!("invalid redirect URI: {err}")))?;
-    Ok(redirect
-        .port()
-        .unwrap_or(if redirect.scheme() == "https" { 443 } else { 80 }))
+    Ok(redirect.port().unwrap_or(if redirect.scheme() == "https" {
+        443
+    } else {
+        80
+    }))
 }
 
-fn wait_for_auth_code(server: tiny_http::Server, redirect_uri: &str) -> Result<String, SpotifyError> {
+fn wait_for_auth_code(
+    server: tiny_http::Server,
+    redirect_uri: &str,
+) -> Result<String, SpotifyError> {
     let redirect_uri = redirect_uri.to_string();
     let (tx, rx) = std::sync::mpsc::sync_channel::<Result<String, SpotifyError>>(1);
 
@@ -94,11 +98,7 @@ fn wait_for_auth_code(server: tiny_http::Server, redirect_uri: &str) -> Result<S
 fn open_authorize_url(url: &str) -> Result<(), SpotifyError> {
     #[cfg(target_os = "macos")]
     {
-        if std::process::Command::new("open")
-            .arg(url)
-            .spawn()
-            .is_ok()
-        {
+        if std::process::Command::new("open").arg(url).spawn().is_ok() {
             return Ok(());
         }
     }

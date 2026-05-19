@@ -15,6 +15,17 @@ fn emit_welcome_check(app: &tauri::AppHandle) {
     let _ = app.emit(WELCOME_CHECK_EVENT, ());
 }
 
+fn show_widget_windows(app: &tauri::AppHandle) {
+    for label in ["lyric", "calendar", "weather"] {
+        let Some(window) = app.get_webview_window(label) else {
+            continue;
+        };
+        if let Err(err) = window.show() {
+            eprintln!("[orbit] show {label}: {err}");
+        }
+    }
+}
+
 fn attach_welcome_triggers(app: &tauri::AppHandle) {
     for (label, window) in app.webview_windows() {
         if label == "welcome" {
@@ -35,6 +46,7 @@ fn main() {
     let _ = dotenvy::dotenv();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_geolocation::init())
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_denylist(&["welcome"])
@@ -62,7 +74,18 @@ fn main() {
                 eprintln!("[orbit] set_activation_policy: {err}");
             }
 
-            attach_welcome_triggers(app.handle());
+            let handle = app.handle().clone();
+            if let Some(welcome) = handle.get_webview_window("welcome") {
+                let _ = welcome.hide();
+            }
+            show_widget_windows(&handle);
+            attach_welcome_triggers(&handle);
+
+            let welcome_handle = handle.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(2_000));
+                emit_welcome_check(&welcome_handle);
+            });
 
             Ok(())
         })

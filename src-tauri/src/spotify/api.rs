@@ -4,7 +4,7 @@ use tauri::AppHandle;
 
 use crate::spotify::auth::{ensure_access_token, refresh_access_token};
 use crate::spotify::config::SpotifyConfig;
-use crate::spotify::error::{SpotifyError, is_revoked_refresh};
+use crate::spotify::error::{is_revoked_refresh, SpotifyError};
 use crate::spotify::tokens::{clear, load, save};
 
 #[derive(Debug, Clone)]
@@ -56,9 +56,7 @@ pub async fn fetch_now_playing(app: &AppHandle) -> Result<NowPlaying, SpotifyErr
     if response.status() == reqwest::StatusCode::UNAUTHORIZED {
         let config = SpotifyConfig::load()?;
         let stored = load(app)?;
-        let refresh_token = stored
-            .refresh_token
-            .ok_or(SpotifyError::NotAuthenticated)?;
+        let refresh_token = stored.refresh_token.ok_or(SpotifyError::NotAuthenticated)?;
         let refreshed = match refresh_access_token(&config, &refresh_token).await {
             Ok(tokens) => tokens,
             Err(err) if is_revoked_refresh(&err) => {

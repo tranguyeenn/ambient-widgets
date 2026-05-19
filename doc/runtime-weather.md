@@ -1,6 +1,6 @@
 # Weather widget
 
-Frontend-only widget: Open-Meteo forecast, BigDataCloud reverse geocoding, browser geolocation. No Rust IPC.
+Frontend widget: Open-Meteo forecast, BigDataCloud reverse geocoding, and Tauri geolocation plugin (`@tauri-apps/plugin-geolocation`) for macOS location permission + coordinates.
 
 ## Window
 
@@ -16,7 +16,8 @@ Position and size persist via `tauri-plugin-window-state` (same as lyric/calenda
 |-----|---------|-----|
 | [Open-Meteo Forecast](https://open-meteo.com/en/docs) | Current temp, WMO weather code, daily high/low | None |
 | [BigDataCloud reverse geocode](https://www.bigdatacloud.com/docs/api/free-reverse-geocode-client) | City name from lat/lon | None |
-| `navigator.geolocation` | User location (with macOS prompt) | None |
+| `@tauri-apps/plugin-geolocation` | User location + macOS permission prompt (native app) | `geolocation:default` capability |
+| `navigator.geolocation` | Fallback in browser-only `npm run dev` | None |
 
 ## Location logic
 

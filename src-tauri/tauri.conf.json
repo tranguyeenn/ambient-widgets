@@ -17,6 +17,7 @@
         "title": "Lyrics",
         "url": "pages/lyrics.html",
         "create": true,
+        "visible": true,
         "width": 400,
         "height": 200,
         "minWidth": 300,
@@ -35,6 +36,8 @@
         "label": "calendar",
         "title": "Calendar",
         "url": "pages/calendar.html",
+        "create": true,
+        "visible": true,
         "width": 308,
         "height": 348,
         "minWidth": 260,
@@ -54,6 +57,7 @@
         "title": "Weather",
         "url": "pages/weather.html",
         "create": true,
+        "visible": true,
         "width": 160,
         "height": 160,
         "minWidth": 112,
@@ -91,7 +95,12 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": "'self' asset: http://asset.localhost",
+        "connect-src": "'self' ipc: http://ipc.localhost https://api.open-meteo.com https://api.bigdatacloud.net https://dummyjson.com http://localhost:1420 ws://localhost:1420",
+        "img-src": "'self' asset: http://asset.localhost blob: data:",
+        "style-src": "'unsafe-inline' 'self'"
+      }
     }
   },
   "bundle": {

@@ -44,15 +44,41 @@ export default function WeatherWidget() {
   }, []);
 
   useEffect(() => {
-    const initial = resolveWeatherLocation();
-    setActiveLocation(initial);
-    void loadWeather(initial);
+    let cancelled = false;
+
+    async function init() {
+      const resolved = resolveWeatherLocation();
+      setActiveLocation(resolved);
+      await loadWeather(resolved);
+      if (cancelled) return;
+
+      if (resolved.mode !== "default") return;
+
+      setLocating(true);
+      const result = await activateMyLocation();
+      if (cancelled) return;
+      setLocating(false);
+
+      if (!result.ok) {
+        setLocationNotice(result.notice);
+        return;
+      }
+
+      setLocationNotice(null);
+      setActiveLocation(result.location);
+      await loadWeather(result.location);
+    }
+
+    void init();
 
     const interval = setInterval(() => {
       void loadWeather(resolveWeatherLocation());
     }, REFRESH_MS);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [loadWeather]);
 
   const onDragMouseDown = () => {
@@ -67,6 +93,8 @@ export default function WeatherWidget() {
 
     if (!result.ok) {
       setLocationNotice(result.notice);
+    } else {
+      setLocationNotice(null);
     }
 
     setActiveLocation(result.location);
@@ -85,9 +113,7 @@ export default function WeatherWidget() {
   const locationTitle =
     state.status === "ready"
       ? state.data.locationName
-      : state.status === "error"
-        ? activeLocation.fallbackLocationName
-        : activeLocation.fallbackLocationName;
+      : activeLocation.fallbackLocationName;
 
   return (
     <article
@@ -128,7 +154,7 @@ export default function WeatherWidget() {
           <button
             type="button"
             className="weather-widget__locate"
-            disabled={locating || state.status === "loading"}
+            disabled={locating}
             onClick={() => void handleUseMyLocation()}
           >
             {locating ? "Locating…" : "Use my location"}

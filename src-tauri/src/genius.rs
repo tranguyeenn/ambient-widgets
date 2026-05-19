@@ -86,7 +86,10 @@ pub async fn fetch_lyric_candidates_from_url(url: &str) -> Result<Vec<String>, G
 }
 
 /// Prefer Genius "English Translation" pages over the original Korean lyrics.
-pub async fn fetch_lyric_candidates_english(song: &str, artist: &str) -> Result<Vec<String>, GeniusError> {
+pub async fn fetch_lyric_candidates_english(
+    song: &str,
+    artist: &str,
+) -> Result<Vec<String>, GeniusError> {
     if let Ok(candidates) = fetch_lyric_candidates_from_url(HOLD_MY_HAND_ENGLISH_URL).await {
         return Ok(candidates);
     }
