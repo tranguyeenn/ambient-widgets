@@ -6,7 +6,6 @@ mod commands;
 mod genius;
 mod lyric_filter;
 mod spotify;
-mod zenquotes;
 
 fn main() {
     let env_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
@@ -18,7 +17,6 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::get_current_lyric,
-            commands::fetch_zen_quote,
             commands::get_now_playing_track,
             commands::spotify_is_authenticated,
             commands::spotify_login,

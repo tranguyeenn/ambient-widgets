@@ -9,7 +9,6 @@
     "opener:default",
     "allow-get-current-lyric",
     "allow-get-now-playing-track",
-    "allow-fetch-zen-quote",
     "allow-spotify-login",
     "allow-spotify-is-authenticated",
     "window-state:default"

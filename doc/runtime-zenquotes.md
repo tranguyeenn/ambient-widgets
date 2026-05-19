@@ -1,39 +1,36 @@
-# ZenQuotes & quote mode
+# DummyJSON quotes & quote mode
 
 Used when Spotify has no current track or is unavailable.
 
-## Why Rust, not the browser?
-
-ZenQuotes does not allow browser CORS from the webview. The frontend calls `invoke("fetch_zen_quote")` so HTTP runs in Rust (`zenquotes.rs`) and bypasses CORS.
-
-## Frontend flow — `getFallbackQuote()`
+## Frontend flow — `getRandomQuote()`
 
 **File:** `src/lib/quoteApi.ts`
 
 ```text
-getFallbackQuote()
+getRandomQuote()
     │
-    ├─ In-memory cache younger than 15s ──► return cached quote
+    ├─ In-memory cache younger than 15s ──► return cached formatted quote
     │
-    └─ invoke fetch_zen_quote
+    └─ fetch https://dummyjson.com/quotes/random
               │
-              ├─ success ──► store in memory cache, return
-              └─ fail ──► LOCAL_FALLBACK_QUOTE
-                    (“nothing playing, so here’s a thought instead.”)
+              ├─ success ──► format as:
+              │                 "Quote text"
+              │                 — Author
+              │              store in memory cache, return
+              │
+              └─ fail ──► random calming fallback message
 ```
 
-Cache is **in-memory only** (legacy `localStorage` key is cleared on load).
+## API
 
-## Rust — `fetch_zen_quote`
-
-- HTTP to ZenQuotes API
-- Optional `ZENQUOTES_API_KEY` in `.env` for higher rate limits
-- Returns `{ text, author }` (camelCase to TS)
+- **Endpoint:** `https://dummyjson.com/quotes/random`
+- **Response:** `{ id, quote, author }`
+- Fetched from the webview (DummyJSON allows CORS); no Rust IPC or env vars.
 
 ## UI
 
-- Quote mode: header shows quote-mode label
-- Text wrapped in typographic quotes in `LyricTile`
+- Quote mode: header shows author (or `quote mode` for fallbacks) and a `quote mode` label
+- Body shows the formatted quote or fallback text (multi-line via `white-space: pre-line`)
 - New quote requested each refresh window when cache is stale (~15s)
 
 ## Related docs

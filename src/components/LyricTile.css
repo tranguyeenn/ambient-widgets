@@ -130,6 +130,11 @@
   color: rgba(245, 245, 247, 0.92);
 }
 
+.lyric-tile__line--quote {
+  white-space: pre-line;
+  text-transform: none;
+}
+
 .lyric-tile__connect {
   margin: 0;
   padding: 0;

@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getNowPlayingTrack } from "../lib/nowPlaying";
-import { getFallbackQuote, QUOTE_REFRESH_MS } from "../lib/quoteApi";
+import {
+  getRandomQuote,
+  parseQuoteAuthor,
+  QUOTE_REFRESH_MS,
+} from "../lib/quoteApi";
 import type { LyricResult } from "../types/lyric";
-import type { Quote } from "../types/quote";
 import { FALLBACK_LYRIC } from "../utils/lyricFallback";
 import "./LyricTile.css";
 
@@ -24,7 +27,7 @@ async function loadLyric(): Promise<LyricResult> {
 function LyricTile() {
   const [mode, setMode] = useState<TileMode>("quote");
   const [lyric, setLyric] = useState<LyricResult | null>(null);
-  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteText, setQuoteText] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -49,11 +52,11 @@ function LyricTile() {
       const result = await loadLyric();
       setMode("lyric");
       setLyric(result);
-      setQuote(null);
+      setQuoteText(null);
     } else {
-      const fallbackQuote = await getFallbackQuote();
+      const quote = await getRandomQuote();
       setMode("quote");
-      setQuote(fallbackQuote);
+      setQuoteText(quote);
       setLyric(null);
     }
 
@@ -117,18 +120,21 @@ function LyricTile() {
   const showConnect =
     !loading && !connecting && isQuoteMode && !authenticated;
 
+  const quoteAuthor =
+    isQuoteMode && quoteText ? parseQuoteAuthor(quoteText) : null;
+
   const displayLine = connecting
     ? "Opening Spotify login…"
     : loading
       ? "Loading…"
-      : isQuoteMode && quote
-        ? `“${quote.text}”`
+      : isQuoteMode && quoteText
+        ? quoteText
         : lyric
           ? `“${lyric.line}”`
           : "No lyric found.";
 
   const displaySong = isQuoteMode
-    ? (quote?.author ?? "…")
+    ? (quoteAuthor ?? "quote mode")
     : (lyric?.song ?? "Song Title");
   const displayArtist = isQuoteMode
     ? "quote mode"
@@ -176,7 +182,15 @@ function LyricTile() {
         </div>
 
         <div className="lyric-tile__copy">
-          <p className="lyric-tile__line">{displayLine}</p>
+          <p
+            className={
+              isQuoteMode
+                ? "lyric-tile__line lyric-tile__line--quote"
+                : "lyric-tile__line"
+            }
+          >
+            {displayLine}
+          </p>
 
           {showConnect ? (
             <button

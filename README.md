@@ -1,6 +1,6 @@
 # Ambient Widgets
 
-Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. Spotify, Genius, ZenQuotes, and calendar logic run through the Rust shell—no separate backend server.
+Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React**. Each widget runs in its **own** native window so layouts stay independent. Spotify and Genius run through the Rust shell; quotes use [DummyJSON](https://dummyjson.com) from the frontend—no separate backend server.
 
 ![App icon](src-tauri/app-icon.png)
 
@@ -10,7 +10,7 @@ Small, transparent **macOS** desktop widgets built with **Tauri 2** and **React*
 
 | | Calendar | Lyrics |
 | --- | --- | --- |
-| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** short quote from [ZenQuotes](https://zenquotes.io) when nothing is playing or Spotify is unavailable |
+| **What it does** | Full month grid with prev/next navigation, today highlight, clickable dates | **Lyric mode:** Genius line for the **currently playing** Spotify track. **Quote mode:** random quote from [DummyJSON](https://dummyjson.com/docs/quotes) when nothing is playing or Spotify is unavailable |
 | **Launch** | Opens with the app | Opens with the app |
 | **Resize** | Yes — drag window edges; content scales with size | Yes |
 | **Position memory** | Restored on next launch | Restored on next launch |
@@ -82,7 +82,7 @@ In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior liv
 | Lyrics widget (poll loop) | [runtime-lyrics-widget.md](./doc/runtime-lyrics-widget.md) |
 | Spotify OAuth | [runtime-spotify.md](./doc/runtime-spotify.md) |
 | Genius & lyric cache | [runtime-genius-cache.md](./doc/runtime-genius-cache.md) |
-| ZenQuotes & quote mode | [runtime-zenquotes.md](./doc/runtime-zenquotes.md) |
+| DummyJSON & quote mode | [runtime-zenquotes.md](./doc/runtime-zenquotes.md) |
 | Calendar widget | [runtime-calendar.md](./doc/runtime-calendar.md) |
 
 ---
@@ -92,7 +92,7 @@ In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior liv
 - **Node + npm** — frontend tooling
 - **Rust + Tauri v2** — [prerequisites](https://v2.tauri.app/start/prerequisites/)
 - **Spotify + Genius** (lyric mode) — API credentials in `src-tauri/.env` (see below)
-- **ZenQuotes** (quote mode) — optional API key in `.env` if you hit rate limits; works without a key when requests succeed
+- **DummyJSON** (quote mode) — fetched from the webview; no API key required
 
 ---
 
@@ -110,13 +110,10 @@ In-depth guides for build pipelines, Tauri/Rust config, and runtime behavior liv
    SPOTIFY_CLIENT_ID=your_spotify_client_id
    SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
    GENIUS_ACCESS_TOKEN=your_genius_access_token
-   # Optional — higher ZenQuotes limits
-   # ZENQUOTES_API_KEY=your_zenquotes_key
    ```
 
    - **Spotify:** [Developer Dashboard](https://developer.spotify.com/dashboard) — add redirect URI `http://127.0.0.1:8888/callback`
    - **Genius:** [API clients](https://genius.com/api-clients) — create a client access token
-   - **ZenQuotes (optional):** [zenquotes.io/developers](https://zenquotes.io/developers) — free key if quote mode keeps showing the local fallback (rate limits)
 
 3. Run the app. On first launch the lyric window may open Spotify login in your browser; approve access, then play something in Spotify on this Mac.
 
@@ -126,7 +123,7 @@ The tile polls every **15 seconds**:
 
 1. **Spotify first** — `get_now_playing_track` checks for a current track.
 2. **Lyric mode** — if a track is playing, `get_current_lyric` fetches a filtered Genius line (with per-track cache rotation).
-3. **Quote mode** — if Spotify is off, disconnected, errors, or nothing is playing, the UI switches to **quote mode** (subtle label in the header). Quotes are fetched from ZenQuotes via Rust (`fetch_zen_quote`) so the webview is not blocked by CORS. A new quote is requested each refresh window (~15s in-memory cache). If ZenQuotes fails, a local fallback is shown: *“nothing playing, so here’s a thought instead.”* / *quiet mode*.
+3. **Quote mode** — if Spotify is off, disconnected, errors, or nothing is playing, the UI switches to **quote mode** (subtle label in the header). Quotes are fetched from DummyJSON (`getRandomQuote` in `quoteApi.ts`). A new quote is requested each refresh window (~15s in-memory cache). If the API fails, a random calming fallback message is shown.
 
 **Connect Spotify** appears in quote mode when you are not authenticated.
 
@@ -169,8 +166,8 @@ pages/lyrics.html    ──►  lyrics.tsx    ──►  LyricTile
                     │                                     ┌──────────┼──────────┐
                     │ no track                            ▼          ▼          ▼
                     ▼                              genius.rs    cache.rs   lyric_filter.rs
-         getFallbackQuote()  ──►  invoke("fetch_zen_quote")  ──►  zenquotes.rs
-         (src/lib/quoteApi.ts)       (ZenQuotes API, no CORS)
+         getRandomQuote()  ──►  fetch dummyjson.com/quotes/random
+         (src/lib/quoteApi.ts)
 ```
 
 - **Vite multi-page:** `pages/*.html` + `src/*.tsx` entries in `vite.config.ts`
@@ -200,13 +197,12 @@ ambient-widgets/
 │   │   └── LyricTile.tsx / .css
 │   ├── lib/
 │   │   ├── nowPlaying.ts      # get_now_playing_track wrapper
-│   │   └── quoteApi.ts        # ZenQuotes + quote-mode cache
+│   │   └── quoteApi.ts        # DummyJSON quotes + quote-mode cache
 │   ├── utils/
 │   │   ├── calendar.ts
 │   │   └── lyricFallback.ts
 │   ├── types/
 │   │   ├── lyric.ts
-│   │   ├── quote.ts
 │   │   └── nowPlaying.ts
 │   └── styles/
 │       └── widget-shell.css
@@ -218,7 +214,6 @@ ambient-widgets/
 │   │   ├── commands.rs
 │   │   ├── spotify/           # auth, tokens, now playing
 │   │   ├── genius.rs
-│   │   ├── zenquotes.rs
 │   │   ├── lyric_filter.rs
 │   │   └── cache.rs
 │   ├── permissions/

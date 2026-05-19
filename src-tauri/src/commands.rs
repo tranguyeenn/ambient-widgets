@@ -4,8 +4,6 @@ use tauri::AppHandle;
 use crate::cache::{self, CacheEntry};
 use crate::genius::{self, GeniusError};
 use crate::spotify::{NowPlaying, SpotifyError, login};
-use crate::zenquotes;
-
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LyricResult {
@@ -116,11 +114,6 @@ fn now_playing_to_track(now_playing: NowPlaying) -> NowPlayingTrack {
         artist: now_playing.artist,
         album_art: now_playing.album_art,
     }
-}
-
-#[tauri::command]
-pub async fn fetch_zen_quote() -> Result<zenquotes::Quote, String> {
-    zenquotes::fetch_random_quote().await
 }
 
 #[tauri::command]
