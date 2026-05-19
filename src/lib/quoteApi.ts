@@ -2,6 +2,8 @@
 export const QUOTE_REFRESH_MS = 15_000;
 
 const DUMMYJSON_QUOTE_URL = "https://dummyjson.com/quotes/random";
+const MAX_QUOTE_WORDS = 50;
+const MAX_FETCH_ATTEMPTS = 8;
 
 const FALLBACK_MESSAGES = [
   "No music playing. Sit with the silence.",
@@ -69,8 +71,38 @@ function toSentenceCase(text: string): string {
   return result;
 }
 
+function countWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+function isQuoteShortEnough(quote: string): boolean {
+  return countWords(quote) <= MAX_QUOTE_WORDS;
+}
+
 function formatQuote(quote: string, author: string): string {
   return `"${toSentenceCase(quote)}"\n— ${author}`;
+}
+
+async function fetchShortQuoteFromApi(): Promise<string | null> {
+  for (let attempt = 0; attempt < MAX_FETCH_ATTEMPTS; attempt++) {
+    const response = await fetch(DUMMYJSON_QUOTE_URL, {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) continue;
+
+    const data: unknown = await response.json();
+    if (!isDummyJsonQuote(data)) continue;
+
+    const quote = data.quote.trim();
+    const author = data.author.trim();
+    if (!quote || !author || !isQuoteShortEnough(quote)) continue;
+
+    return formatQuote(quote, author);
+  }
+
+  return null;
 }
 
 /** Author line from a formatted quote, or null for fallback-only text. */
@@ -91,27 +123,13 @@ export async function getRandomQuote(): Promise<string> {
   if (cached) return cached.text;
 
   try {
-    const response = await fetch(DUMMYJSON_QUOTE_URL, {
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      return pickRandomFallback();
+    const formatted = await fetchShortQuoteFromApi();
+    if (formatted) {
+      return storeCache(formatted);
     }
-
-    const data: unknown = await response.json();
-    if (!isDummyJsonQuote(data)) {
-      return pickRandomFallback();
-    }
-
-    const quote = data.quote.trim();
-    const author = data.author.trim();
-    if (!quote || !author) {
-      return pickRandomFallback();
-    }
-
-    return storeCache(formatQuote(quote, author));
   } catch (err) {
     console.warn("[quotes]", err);
-    return pickRandomFallback();
   }
+
+  return pickRandomFallback();
 }
